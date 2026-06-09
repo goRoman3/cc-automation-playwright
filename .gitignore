@@ -23,6 +23,7 @@ ai-snapshots/
 *.ai-snapshot.json
 page-analysis-*.json
 html-dump-*.html
+agents/
 
 # Artifacts
 screenshots/
