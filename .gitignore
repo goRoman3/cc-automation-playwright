@@ -1,0 +1,44 @@
+node_modules/
+.env
+dist/
+
+# Auth state
+.auth/
+/playwright/.auth/
+
+# Dev-tool configs (local only, no secrets but not project code)
+.mcp.json
+.claude/
+
+# Playwright output — all AI-visible results
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+*.log
+
+# AI analysis outputs
+.ai-reports/
+ai-snapshots/
+*.ai-snapshot.json
+page-analysis-*.json
+html-dump-*.html
+
+# Artifacts
+screenshots/
+videos/
+traces/
+*.png
+*.jpg
+*.zip
+
+# SonarQube
+.scannerwork/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

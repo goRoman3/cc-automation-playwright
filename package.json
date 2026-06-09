@@ -1,0 +1,26 @@
+{
+  "name": "callcabinet-automation-playwright",
+  "version": "1.0.0",
+  "description": "Playwright E2E automation for CallCabinet (Smarsh) staging environment",
+  "scripts": {
+    "test": "playwright test",
+    "test:ci": "playwright test --project=chromium --grep-invert \"@email @integration\"",
+    "test:login": "playwright test e2e/login/",
+    "test:reset": "playwright test e2e/password-reset/ --headed --project=chromium",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:chrome": "playwright test --project=chromium",
+    "typecheck": "tsc --noEmit",
+    "email:check": "tsx scripts/check-email-agent.ts",
+    "email:wait": "tsx scripts/wait-for-email.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0",
+    "@types/node": "^25.9.2",
+    "dotenv": "^16.6.1",
+    "googleapis": "^173.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  }
+}

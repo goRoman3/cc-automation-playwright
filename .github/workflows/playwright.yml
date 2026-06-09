@@ -1,0 +1,99 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  # Allow manually triggering the email-integration job from the Actions UI
+  workflow_dispatch:
+    inputs:
+      run_email_tests:
+        description: Run email integration tests (requires Gmail secrets + reCAPTCHA bypass)
+        type: boolean
+        default: false
+
+jobs:
+  # ── Smoke + login tests (Chromium only, no external email dependency) ────────
+  smoke:
+    name: Smoke & Login Tests
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run smoke & login tests
+        run: npm run test:ci
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          retention-days: 30
+
+  # ── Password-reset / email-integration tests ─────────────────────────────────
+  # Triggered manually via workflow_dispatch with run_email_tests=true.
+  #
+  # Prerequisites before enabling:
+  #   1. Add GitHub repository secrets: GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET,
+  #      GMAIL_REFRESH_TOKEN, TEST_NEW_PASSWORD
+  #   2. Ask the staging team to whitelist GitHub Actions IP range for reCAPTCHA,
+  #      or configure a self-hosted runner on an already-whitelisted IP.
+  #      Without this, the forgot-password form will be blocked by reCAPTCHA
+  #      even in headed mode.
+  email-integration:
+    name: Email Integration Tests
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_email_tests }}
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      TEST_NEW_PASSWORD: ${{ secrets.TEST_NEW_PASSWORD }}
+      GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+      GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+      GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      # reCAPTCHA blocks headless form submissions — run headed via virtual display
+      - name: Install Xvfb
+        run: sudo apt-get install -y xvfb
+
+      - name: Run email integration tests (headed via Xvfb)
+        run: xvfb-run --auto-servernum npm run test:reset
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-email
+          path: playwright-report/
+          retention-days: 30
