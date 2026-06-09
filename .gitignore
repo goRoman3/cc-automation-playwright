@@ -1,31 +1,43 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
-.env
+package-lock.json
+
+# ── Package / project config (local-only) ────────────────────────────────────
+package.json
+tsconfig.json
 dist/
 
-# Auth state
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env*
+
+# ── Documentation / markdown ──────────────────────────────────────────────────
+*.md
+agents/
+specs/
+
+# ── Auth state ────────────────────────────────────────────────────────────────
 .auth/
 /playwright/.auth/
 
-# Dev-tool configs (local only, no secrets but not project code)
+# ── Dev-tool configs (local-only) ─────────────────────────────────────────────
 .mcp.json
 .claude/
 
-# Playwright output — all AI-visible results
+# ── Playwright output ─────────────────────────────────────────────────────────
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
 *.log
 
-# AI analysis outputs
+# ── AI analysis outputs ───────────────────────────────────────────────────────
 .ai-reports/
 ai-snapshots/
 *.ai-snapshot.json
 page-analysis-*.json
 html-dump-*.html
-agents/
 
-# Artifacts
+# ── Artifacts ─────────────────────────────────────────────────────────────────
 screenshots/
 videos/
 traces/
@@ -33,13 +45,13 @@ traces/
 *.jpg
 *.zip
 
-# SonarQube
+# ── SonarQube ─────────────────────────────────────────────────────────────────
 .scannerwork/
 
-# OS
+# ── OS ────────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# IDE
+# ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
