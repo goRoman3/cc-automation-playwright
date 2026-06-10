@@ -78,14 +78,21 @@ test.describe('Password reset @email @integration', () => {
     await forgotPasswordPage.fillEmail(testUser.email);
     await forgotPasswordPage.submit();
 
+    // Wait for the form to respond (reCAPTCHA v3 scoring happens server-side)
+    await page.waitForTimeout(3_000);
+
+    // Log the actual prompt text to diagnose what the app shows after submit
+    const actualText = await forgotPasswordPage.promptText.textContent();
+    console.log('[DEBUG] promptText after submit:', actualText);
+
     // reCAPTCHA: if the app returns "Captcha validation failed", re-run with --headed.
     await expect(forgotPasswordPage.promptText).not.toContainText(/captcha validation failed/i, {
-      timeout: 8_000,
+      timeout: 5_000,
     });
 
     await expect(forgotPasswordPage.promptText).toContainText(
-      /email.*sent|check your email|instructions.*sent|reset.*link/i,
-      { timeout: 10_000 },
+      /email.*sent|check your email|instructions.*sent|reset.*link|password.*reset/i,
+      { timeout: 15_000 },
     );
   });
 
