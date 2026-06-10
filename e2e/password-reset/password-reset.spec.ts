@@ -19,9 +19,9 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
-import { ForgotPasswordPage } from '../../pages/ForgotPasswordPage';
-import { ResetPasswordPage } from '../../pages/ResetPasswordPage';
+import { LoginPage } from '../../pages/login/LoginPage';
+import { ForgotPasswordPage } from '../../pages/login/ForgotPasswordPage';
+import { ResetPasswordPage } from '../../pages/login/ResetPasswordPage';
 import { waitForPasswordResetLink } from '../../helpers/gmailAgent';
 import { getTestUser, type TestUser } from '../../helpers/testUsers';
 

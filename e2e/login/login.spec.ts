@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
+import { LoginPage } from '../../pages/login/LoginPage';
 
 // Both resolved from env only — no hardcoded fallbacks that could end up in git.
 // Tests in 3.5 and 3.6 skip when either var is absent.

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../pages/login/LoginPage';
 
 test.describe('Smoke — application reachability', () => {
   test('login page loads and has correct title', async ({ page }) => {
