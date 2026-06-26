@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/login/LoginPage';
-import { ForgotPasswordPage } from '../../pages/login/ForgotPasswordPage';
+import { LoginPage } from './LoginPage';
+import { ForgotPasswordPage } from './ForgotPasswordPage';
 
 /**
  * Azure Login case 6826 — Verify that all links on the Login page have proper

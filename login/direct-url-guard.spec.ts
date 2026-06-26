@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/login/LoginPage';
+import { LoginPage } from './LoginPage';
 import { PROTECTED_ROUTES } from '../fixtures/protected-routes';
 
 /**

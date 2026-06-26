@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/login/LoginPage';
-import { ForgotPasswordPage } from '../../pages/login/ForgotPasswordPage';
+import { LoginPage } from './LoginPage';
+import { ForgotPasswordPage } from './ForgotPasswordPage';
 
 /**
  * Azure Login cases on the "Forgot your password?" overlay:

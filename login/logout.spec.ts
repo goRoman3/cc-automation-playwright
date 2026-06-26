@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/login/LoginPage';
-import { HomePage } from '../../pages/home/HomePage';
+import { LoginPage } from './LoginPage';
+import { HomePage } from '../home/HomePage';
 
 /**
  * Azure Login case 6844 — clicking the browser Back button after a successful

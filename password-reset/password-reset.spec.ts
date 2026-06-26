@@ -25,12 +25,12 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/login/LoginPage';
-import { ForgotPasswordPage } from '../../pages/login/ForgotPasswordPage';
-import { ResetPasswordPage } from '../../pages/login/ResetPasswordPage';
-import { waitForPasswordResetLink } from '../../helpers/gmailAgent';
-import { getTestUser, type TestUser } from '../../helpers/testUsers';
-import { generateValidPassword, persistEnvVar } from '../../helpers/passwordRotation';
+import { LoginPage } from '../login/LoginPage';
+import { ForgotPasswordPage } from '../login/ForgotPasswordPage';
+import { ResetPasswordPage } from './ResetPasswordPage';
+import { waitForPasswordResetLink } from '../helpers/gmailAgent';
+import { getTestUser, type TestUser } from '../helpers/testUsers';
+import { generateValidPassword, persistEnvVar } from '../helpers/passwordRotation';
 
 // ── Test user ──────────────────────────────────────────────────────────────
 // C2 fix: never throw at module load — tests skip gracefully via beforeEach
