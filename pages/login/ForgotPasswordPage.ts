@@ -23,6 +23,7 @@ export class ForgotPasswordPage {
   readonly submitButton: Locator;
   readonly closeButton: Locator;
   readonly promptText: Locator;
+  readonly emailValidationError: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -33,6 +34,8 @@ export class ForgotPasswordPage {
     this.submitButton = page.getByRole('button', { name: 'SUBMIT' });
     this.closeButton = page.getByRole('button', { name: 'CLOSE' });
     this.promptText = page.locator('[class*=forgot-password_enterPrompt]');
+    // Client-side validation message shown when an invalid email is submitted.
+    this.emailValidationError = page.getByText(/please enter a valid e-?mail address/i);
   }
 
   async isVisible(): Promise<boolean> {

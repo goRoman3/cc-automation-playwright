@@ -19,9 +19,13 @@ specs/
 .auth/
 /playwright/.auth/
 
-# ── Dev-tool configs (local-only) ─────────────────────────────────────────────
-.mcp.json
+# ── Claude Code (config, local state & dialogs) ──────────────────────────────
 .claude/
+.claude.json
+.claude.local.json
+.mcp.json
+CLAUDE.md
+CLAUDE.local.md
 
 # ── Playwright output ─────────────────────────────────────────────────────────
 /test-results/

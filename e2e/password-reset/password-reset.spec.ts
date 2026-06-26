@@ -12,6 +12,12 @@
  * Tags: @email @integration @external
  * Not included in default smoke suite (requires Gmail credentials + headed run).
  *
+ * ⚠️ BLOCKED (2026-06-16): the forgot-password reCAPTCHA v3 returns "Captcha
+ * validation failed" and no email is sent — even in --headed mode. This whole
+ * suite (incl. the rotation + 6870 additions below) cannot run until staging
+ * whitelists the test IP/account. Once unblocked, a single `npm run test:reset`
+ * validates the flow and exposes the reset-page DOM needed for cases 23258/23262.
+ *
  * Required .env variables:
  *   GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN
  *   TEST_EMAIL (or TEST_USERS_JSON with alias "resetUser")
@@ -24,6 +30,7 @@ import { ForgotPasswordPage } from '../../pages/login/ForgotPasswordPage';
 import { ResetPasswordPage } from '../../pages/login/ResetPasswordPage';
 import { waitForPasswordResetLink } from '../../helpers/gmailAgent';
 import { getTestUser, type TestUser } from '../../helpers/testUsers';
+import { generateValidPassword, persistEnvVar } from '../../helpers/passwordRotation';
 
 // ── Test user ──────────────────────────────────────────────────────────────
 // C2 fix: never throw at module load — tests skip gracefully via beforeEach
@@ -40,6 +47,14 @@ try {
 }
 
 const APP_NAME = 'Smarsh';
+
+// ── Password rotation ────────────────────────────────────────────────────────
+// Generate a FRESH valid password each run so it never collides with the
+// previous-ten history (the app rejects reused passwords). After a confirmed
+// reset we persist it back to .env as TEST_PASSWORD, and capture the working
+// password beforehand to prove the OLD one stops working (case 6870).
+const newPassword = generateValidPassword();
+const oldPassword = testUser.password;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -100,12 +115,7 @@ test.describe('Password reset @email @integration', () => {
   // Steps 4-11: Open reset link → set new password → verify success
   // ──────────────────────────────────────────────────────────────────────────
   test('opens reset link, sets new password, and verifies success', async ({ page }) => {
-    const { newPassword } = testUser;
     const resetPasswordPage = new ResetPasswordPage(page);
-
-    if (!newPassword) {
-      test.skip(true, 'TEST_NEW_PASSWORD (or newPassword in TEST_USERS_JSON) is not set.');
-    }
 
     // Poll Gmail for the reset email (up to 90 seconds).
     // sentAfterMs defaults to Date.now() inside waitForPasswordResetLink so stale
@@ -122,25 +132,42 @@ test.describe('Password reset @email @integration', () => {
     await resetPasswordPage.goto(resetLink);
 
     await expect(resetPasswordPage.newPasswordInput).toBeVisible({ timeout: 10_000 });
-    await resetPasswordPage.resetPassword(newPassword!);
+    await resetPasswordPage.resetPassword(newPassword);
 
     await expect(resetPasswordPage.successMessage).toBeVisible({ timeout: 15_000 });
+
+    // Rotation: persist the new password so this and future runs use it. Only
+    // after the reset is confirmed successful, to avoid desyncing .env from the
+    // real account state.
+    await persistEnvVar('TEST_PASSWORD', newPassword);
   });
 
   // ──────────────────────────────────────────────────────────────────────────
   // Steps 12-13: Log in with new password → verify authenticated area
   // ──────────────────────────────────────────────────────────────────────────
   test('logs in with the new password after reset', async ({ page }) => {
-    const { newPassword } = testUser;
     const loginPage = new LoginPage(page);
 
-    if (!newPassword) {
-      test.skip(true, 'TEST_NEW_PASSWORD (or newPassword in TEST_USERS_JSON) is not set.');
-    }
-
     await loginPage.goto();
-    await loginPage.login(testUser.email, newPassword!);
+    await loginPage.login(testUser.email, newPassword);
 
     await expect(page).toHaveURL('/Home', { timeout: 20_000 });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 6870 — the OLD password must no longer work after the reset.
+  // ──────────────────────────────────────────────────────────────────────────
+  test('old password no longer works after reset', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.goto();
+    await loginPage.emailInput.fill(testUser.email);
+    await loginPage.passwordInput.fill(oldPassword); // pre-rotation password
+    await loginPage.loginButton.click();
+
+    await expect(loginPage.invalidCredentialsError).toBeVisible({ timeout: 15_000 });
+    await expect(loginPage.invalidCredentialsError).toContainText(
+      /Invalid credentials|You've been locked out/,
+    );
   });
 });

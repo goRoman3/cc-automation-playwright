@@ -124,6 +124,23 @@ test.describe('Login page', () => {
       await expect(loginPage.invalidCredentialsError).toBeVisible();
       await expect(page).toHaveURL('/');
     });
+
+    // 6835 — a REAL valid email with a wrong password is rejected. Runs only when
+    // credentials are configured; a single failed attempt per run is well below the
+    // ~10-attempt lockout threshold (see case 6845).
+    test('shows "Invalid credentials" for a valid email with a wrong password', async () => {
+      test.skip(
+        !VALID_EMAIL || !VALID_PASSWORD,
+        'Set TEST_EMAIL and TEST_PASSWORD in .env to run this test',
+      );
+      await loginPage.emailInput.fill(VALID_EMAIL!);
+      await loginPage.passwordInput.fill(WRONG_PASSWORD);
+      await loginPage.loginButton.click();
+      await expect(loginPage.invalidCredentialsError).toBeVisible();
+      await expect(loginPage.invalidCredentialsError).toContainText(
+        /Invalid credentials|You've been locked out/
+      );
+    });
   });
 
   // ──────────────────────────────────────────────
@@ -168,6 +185,18 @@ test.describe('Login page', () => {
       await loginPage.loginButton.click();
       await expect(page).toHaveURL('/');
     });
+
+    // 6837 — non-existent (invalid) email with an arbitrary password is rejected.
+    // Uses FAKE_EMAIL so the real account never accrues failed attempts.
+    test('shows "Invalid credentials" for a non-existent email', async () => {
+      await loginPage.emailInput.fill(FAKE_EMAIL);
+      await loginPage.passwordInput.fill(WRONG_PASSWORD);
+      await loginPage.loginButton.click();
+      await expect(loginPage.invalidCredentialsError).toBeVisible();
+      await expect(loginPage.invalidCredentialsError).toContainText(
+        /Invalid credentials|You've been locked out/
+      );
+    });
   });
 
   // ──────────────────────────────────────────────
@@ -184,6 +213,36 @@ test.describe('Login page', () => {
       // login() handles the "already logged in on another computer" modal automatically
       await loginPage.login(VALID_EMAIL!, VALID_PASSWORD!);
       await expect(page).toHaveURL('/Home', { timeout: 20_000 });
+    });
+
+    // 6831 — pressing Enter submits the form just like clicking Login.
+    test('Enter key submits the login form', async ({ page }) => {
+      await loginPage.emailInput.fill(VALID_EMAIL!);
+      await loginPage.passwordInput.fill(VALID_PASSWORD!);
+      await loginPage.passwordInput.press('Enter');
+
+      // Same active-session modal handling as LoginPage.login().
+      const modalVisible = await loginPage.alreadyLoggedInModal
+        .waitFor({ state: 'visible', timeout: 4_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (modalVisible) {
+        await loginPage.logOutOtherSessionButton.click();
+      }
+
+      await expect(page).toHaveURL('/Home', { timeout: 20_000 });
+    });
+
+    // 6843 — clicking the browser Back button after login keeps the user signed in.
+    test('browser Back after login keeps the session', async ({ page }) => {
+      await loginPage.login(VALID_EMAIL!, VALID_PASSWORD!);
+      await page.waitForURL('/Home', { timeout: 20_000 });
+
+      await page.goBack();
+
+      // Must not be bounced to the login form — the session stays active.
+      await expect(loginPage.emailInput).toBeHidden();
+      await expect(page).not.toHaveURL('/');
     });
 
     test('login page is not accessible after successful login', async ({ page }) => {

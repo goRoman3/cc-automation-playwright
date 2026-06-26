@@ -81,12 +81,23 @@ export class LoginPage {
     await this.passwordInput.fill(password);
     await this.loginButton.click();
 
-    const modalVisible = await this.alreadyLoggedInModal
-      .waitFor({ state: 'visible', timeout: 4_000 })
-      .then(() => true)
-      .catch(() => false);
+    // After submit, one of two things happens: the app navigates straight into
+    // the authenticated area, or the "already logged in on another computer"
+    // modal blocks until the other session is dropped. Race both instead of
+    // waiting a fixed window — a late modal used to slip past the old 4s timeout
+    // and stall the login (waitForURL('/Home') would then time out).
+    const outcome = await Promise.race([
+      this.alreadyLoggedInModal
+        .waitFor({ state: 'visible', timeout: 20_000 })
+        .then(() => 'modal' as const)
+        .catch(() => 'none' as const),
+      this.page
+        .waitForURL('/Home', { timeout: 20_000 })
+        .then(() => 'home' as const)
+        .catch(() => 'none' as const),
+    ]);
 
-    if (modalVisible) {
+    if (outcome === 'modal') {
       await this.logOutOtherSessionButton.click();
     }
   }
