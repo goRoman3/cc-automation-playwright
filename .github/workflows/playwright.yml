@@ -1,11 +1,10 @@
 name: Playwright Tests
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-  # Allow manually triggering the email-integration job from the Actions UI
+  # Auto-runs on push/merge and pull requests are DISABLED for now (personal
+  # development). The suite is manual-only — start it from the Actions tab
+  # (Run workflow) when you actually want it. Re-add the `push:` / `pull_request:`
+  # triggers below to restore CI on main.
   workflow_dispatch:
     inputs:
       run_email_tests:
