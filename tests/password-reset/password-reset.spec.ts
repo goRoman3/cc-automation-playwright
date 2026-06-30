@@ -24,13 +24,10 @@
  *   TEST_PASSWORD, TEST_NEW_PASSWORD
  */
 
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../login/LoginPage';
-import { ForgotPasswordPage } from '../login/ForgotPasswordPage';
-import { ResetPasswordPage } from './ResetPasswordPage';
-import { waitForPasswordResetLink } from '../helpers/gmailAgent';
-import { getTestUser, type TestUser } from '../helpers/testUsers';
-import { generateValidPassword, persistEnvVar } from '../helpers/passwordRotation';
+import { test, expect } from '../../fixtures/fixtures';
+import { waitForPasswordResetLink } from '../../helpers/gmailAgent';
+import { getTestUser, type TestUser } from '../../helpers/testUsers';
+import { generateValidPassword, persistEnvVar } from '../../helpers/passwordRotation';
 
 // ── Test user ──────────────────────────────────────────────────────────────
 // C2 fix: never throw at module load — tests skip gracefully via beforeEach
@@ -80,10 +77,7 @@ test.describe('Password reset @email @integration', () => {
   // ──────────────────────────────────────────────────────────────────────────
   // Step 1-3: Trigger reset email and obtain link
   // ──────────────────────────────────────────────────────────────────────────
-  test('submits forgot-password form and receives reset email', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    const forgotPasswordPage = new ForgotPasswordPage(page);
-
+  test('submits forgot-password form and receives reset email', async ({ page, loginPage, forgotPasswordPage }) => {
     await loginPage.goto();
 
     await loginPage.forgotPasswordButton.click();
@@ -114,9 +108,7 @@ test.describe('Password reset @email @integration', () => {
   // ──────────────────────────────────────────────────────────────────────────
   // Steps 4-11: Open reset link → set new password → verify success
   // ──────────────────────────────────────────────────────────────────────────
-  test('opens reset link, sets new password, and verifies success', async ({ page }) => {
-    const resetPasswordPage = new ResetPasswordPage(page);
-
+  test('opens reset link, sets new password, and verifies success', async ({ resetPasswordPage }) => {
     // Poll Gmail for the reset email (up to 90 seconds).
     // sentAfterMs defaults to Date.now() inside waitForPasswordResetLink so stale
     // emails from prior runs in the newer_than:10m window are ignored (C7 fix).
@@ -145,9 +137,7 @@ test.describe('Password reset @email @integration', () => {
   // ──────────────────────────────────────────────────────────────────────────
   // Steps 12-13: Log in with new password → verify authenticated area
   // ──────────────────────────────────────────────────────────────────────────
-  test('logs in with the new password after reset', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
+  test('logs in with the new password after reset', async ({ page, loginPage }) => {
     await loginPage.goto();
     await loginPage.login(testUser.email, newPassword);
 
@@ -157,9 +147,7 @@ test.describe('Password reset @email @integration', () => {
   // ──────────────────────────────────────────────────────────────────────────
   // 6870 — the OLD password must no longer work after the reset.
   // ──────────────────────────────────────────────────────────────────────────
-  test('old password no longer works after reset', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
+  test('old password no longer works after reset', async ({ loginPage }) => {
     await loginPage.goto();
     await loginPage.emailInput.fill(testUser.email);
     await loginPage.passwordInput.fill(oldPassword); // pre-rotation password

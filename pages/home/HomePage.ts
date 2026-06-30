@@ -1,4 +1,5 @@
 import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from '../BasePage';
 
 /**
  * Page object for the authenticated portal shell (post-login).
@@ -12,8 +13,7 @@ import { type Page, type Locator } from '@playwright/test';
  * The Reset Password / Logout actions live inside the "user info" fly-out and are
  * revealed on hover, so logout() hovers the trigger before clicking.
  */
-export class HomePage {
-  readonly page: Page;
+export class HomePage extends BasePage {
   readonly header: Locator;
   readonly userInfoMenu: Locator;
   readonly logoutButton: Locator;
@@ -22,7 +22,7 @@ export class HomePage {
   readonly callListingNavLink: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.header = page.locator('[class*=main-layout_headerContainer]');
     this.userInfoMenu = page.locator('[aria-label="user info"]');
     this.logoutButton = page.locator('[aria-label="Logout"]');

@@ -1,4 +1,5 @@
 import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from '../BasePage';
 
 /**
  * Page object for the password reset form.
@@ -9,15 +10,14 @@ import { type Page, type Locator } from '@playwright/test';
  * Selectors are based on the app's naming convention (Kendo UI + React CSS modules)
  * and must be verified against a real reset link. Use Playwright codegen to confirm.
  */
-export class ResetPasswordPage {
-  readonly page: Page;
+export class ResetPasswordPage extends BasePage {
   readonly newPasswordInput: Locator;
   readonly confirmPasswordInput: Locator;
   readonly submitButton: Locator;
   readonly successMessage: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.newPasswordInput = page.getByPlaceholder(/new password/i);
     this.confirmPasswordInput = page.getByPlaceholder(/confirm password/i);
     this.submitButton = page.getByRole('button', { name: /submit|save|reset|set password/i });

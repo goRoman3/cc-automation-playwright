@@ -1,6 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from './LoginPage';
-import { ForgotPasswordPage } from './ForgotPasswordPage';
+import { test, expect } from '../../fixtures/fixtures';
 
 /**
  * Azure Login case 6826 — Verify that all links on the Login page have proper
@@ -12,22 +10,19 @@ import { ForgotPasswordPage } from './ForgotPasswordPage';
  * "Forgot your password?" control is verified by the overlay it opens.
  */
 test.describe('6826 Login page links redirect correctly', () => {
-  let loginPage: LoginPage;
-
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
+  test.beforeEach(async ({ loginPage }) => {
     await loginPage.goto();
   });
 
-  test('Terms & Conditions link points to the terms page', async () => {
+  test('Terms & Conditions link points to the terms page', async ({ loginPage }) => {
     await expect(loginPage.termsLink).toHaveAttribute('href', /terms-and-conditions/);
   });
 
-  test('Privacy Policy link points to the privacy page', async () => {
+  test('Privacy Policy link points to the privacy page', async ({ loginPage }) => {
     await expect(loginPage.privacyLink).toHaveAttribute('href', /privacy-policy/);
   });
 
-  test('Support link points to the support portal', async () => {
+  test('Support link points to the support portal', async ({ loginPage }) => {
     // Azure case 6826 documents support.callcabinet.com, but the rebranded app
     // now links to the Smarsh support portal (central.smarsh.com). Asserting the
     // live target; flag to QA to refresh the manual case.
@@ -39,10 +34,9 @@ test.describe('6826 Login page links redirect correctly', () => {
     await expect(websiteLink).toHaveAttribute('href', /callcabinet\.com/);
   });
 
-  test('"Forgot your password?" opens the reset overlay', async ({ page }) => {
-    const forgot = new ForgotPasswordPage(page);
+  test('"Forgot your password?" opens the reset overlay', async ({ loginPage, forgotPasswordPage }) => {
     await loginPage.forgotPasswordButton.click();
-    await expect(forgot.container).toBeVisible();
-    await expect(forgot.emailInput).toBeVisible();
+    await expect(forgotPasswordPage.container).toBeVisible();
+    await expect(forgotPasswordPage.emailInput).toBeVisible();
   });
 });

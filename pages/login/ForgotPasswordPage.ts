@@ -1,4 +1,5 @@
 import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from '../BasePage';
 
 /**
  * Page object for the "Forgot your password?" modal overlay.
@@ -16,8 +17,7 @@ import { type Page, type Locator } from '@playwright/test';
  * reCAPTCHA: in headless mode this returns "Captcha validation failed, try again later".
  * Run password-reset tests with --headed, or request staging to whitelist the test IP.
  */
-export class ForgotPasswordPage {
-  readonly page: Page;
+export class ForgotPasswordPage extends BasePage {
   readonly container: Locator;
   readonly emailInput: Locator;
   readonly submitButton: Locator;
@@ -26,7 +26,7 @@ export class ForgotPasswordPage {
   readonly emailValidationError: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.container = page.locator('[class*=forgot-password_container]');
     // Scoped to container to avoid Playwright strict-mode violation when the login
     // form's #email is also in the DOM behind the overlay (C3 fix).

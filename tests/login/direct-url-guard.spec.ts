@@ -1,6 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from './LoginPage';
-import { PROTECTED_ROUTES } from '../fixtures/protected-routes';
+import { test, expect } from '../../fixtures/fixtures';
+import { PROTECTED_ROUTES } from '../../fixtures/protected-routes';
 
 /**
  * Azure Login case 6875 — Verify the impossibility of reaching the system with
@@ -19,9 +18,7 @@ test.describe('6875 Unauthorized direct-URL access is blocked', () => {
   });
 
   for (const route of PROTECTED_ROUTES) {
-    test(`redirects to login when opening ${route}`, async ({ page }) => {
-      const loginPage = new LoginPage(page);
-
+    test(`redirects to login when opening ${route}`, async ({ page, loginPage }) => {
       await page.goto(route);
 
       // Login form is shown → protected content was not rendered (access denied).

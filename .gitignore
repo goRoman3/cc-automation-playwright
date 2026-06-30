@@ -32,6 +32,7 @@ CLAUDE.local.md
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.playwright-mcp/
 *.log
 
 # ── AI analysis outputs ───────────────────────────────────────────────────────
