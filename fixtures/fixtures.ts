@@ -3,6 +3,7 @@ import { LoginPage } from '../pages/login/LoginPage';
 import { ForgotPasswordPage } from '../pages/login/ForgotPasswordPage';
 import { HomePage } from '../pages/home/HomePage';
 import { ResetPasswordPage } from '../pages/password-reset/ResetPasswordPage';
+import { CallListingPage } from '../pages/call-listing/CallListingPage';
 
 /**
  * Page Object fixtures.
@@ -22,6 +23,7 @@ type PageObjects = {
   forgotPasswordPage: ForgotPasswordPage;
   homePage: HomePage;
   resetPasswordPage: ResetPasswordPage;
+  callListingPage: CallListingPage;
 };
 
 export const test = base.extend<PageObjects>({
@@ -36,6 +38,9 @@ export const test = base.extend<PageObjects>({
   },
   resetPasswordPage: async ({ page }, use) => {
     await use(new ResetPasswordPage(page));
+  },
+  callListingPage: async ({ page }, use) => {
+    await use(new CallListingPage(page));
   },
 });
 
