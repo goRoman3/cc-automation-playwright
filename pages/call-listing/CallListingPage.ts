@@ -25,6 +25,9 @@ export class CallListingPage extends BasePage {
   readonly selectAllCheckbox: Locator;
   /** Kendo loading overlay; intercepts pointer events while the grid fetches. */
   readonly loadingMask: Locator;
+  /** The player + per-call action toolbar container. Scoping action buttons here
+   *  avoids clashing with the grid's per-row Play/Download icons. */
+  readonly toolbar: Locator;
 
   // Action toolbar
   readonly playButton: Locator;
@@ -34,6 +37,13 @@ export class CallListingPage extends BasePage {
   readonly addFilterButton: Locator;
   readonly editColumnsButton: Locator;
   readonly savedFiltersButton: Locator;
+
+  // Actions revealed once one or more calls are selected
+  readonly shareButton: Locator;
+  readonly emailButton: Locator;
+  readonly downloadButton: Locator;
+  readonly disableLegalHoldButton: Locator;
+  readonly expandPlayerButton: Locator;
   /** "Got It" button on the onboarding tip overlay (when shown). */
   readonly gotItButton: Locator;
 
@@ -91,14 +101,23 @@ export class CallListingPage extends BasePage {
     this.dataRows = this.grid.locator('tbody tr');
     this.selectAllCheckbox = page.getByRole('checkbox', { name: 'Select All' });
     this.loadingMask = page.locator('.k-loading-mask');
+    this.toolbar = page.locator('#callListingToolsContainer');
 
-    this.playButton = page.getByRole('button', { name: 'Play', exact: true });
-    this.exportToExcelButton = page.getByRole('button', { name: 'Export to Excel' });
-    this.enableLegalHoldButton = page.getByRole('button', { name: 'Enable legal hold' });
-    this.deleteButton = page.getByRole('button', { name: 'Delete', exact: true });
+    this.playButton = this.toolbar.getByRole('button', { name: 'Play', exact: true });
+    this.exportToExcelButton = this.toolbar.getByRole('button', { name: 'Export to Excel' });
+    this.enableLegalHoldButton = this.toolbar.getByRole('button', { name: 'Enable legal hold' });
+    this.deleteButton = this.toolbar.getByRole('button', { name: 'Delete', exact: true });
     this.addFilterButton = page.getByRole('button', { name: 'Add Filter' });
     this.editColumnsButton = page.getByRole('button', { name: 'Edit Columns' });
     this.savedFiltersButton = page.getByRole('button', { name: 'Saved Filters' });
+
+    this.shareButton = this.toolbar.getByRole('button', { name: 'Share', exact: true });
+    this.emailButton = this.toolbar.getByRole('button', { name: 'Email', exact: true });
+    this.downloadButton = this.toolbar.getByRole('button', { name: 'Download', exact: true });
+    // Legal hold is a single toggle that reads "Enable legal hold" or
+    // "Disable legal hold" depending on the selected call's current state.
+    this.disableLegalHoldButton = this.toolbar.getByRole('button', { name: 'Disable legal hold' });
+    this.expandPlayerButton = this.toolbar.getByRole('button', { name: 'Expand player' });
     this.gotItButton = page.getByRole('button', { name: 'Got It' });
 
     this.editFilterButton = page.getByRole('button', { name: 'Edit filter' });
@@ -180,5 +199,15 @@ export class CallListingPage extends BasePage {
   async waitForLoaded(): Promise<void> {
     await this.grid.waitFor({ state: 'visible', timeout: 20_000 });
     await this.loadingMask.waitFor({ state: 'hidden', timeout: 30_000 }).catch(() => {});
+  }
+
+  /** Checkbox of the first data row. */
+  get firstRowCheckbox(): Locator {
+    return this.dataRows.first().getByRole('checkbox');
+  }
+
+  /** Selects the first data row, revealing the per-call action toolbar. */
+  async selectFirstRow(): Promise<void> {
+    await this.firstRowCheckbox.click();
   }
 }

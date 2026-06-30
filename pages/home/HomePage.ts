@@ -20,6 +20,9 @@ export class HomePage extends BasePage {
   readonly resetPasswordButton: Locator;
   readonly homeNavLink: Locator;
   readonly callListingNavLink: Locator;
+  /** "Add Demo Call" — only present in the profile fly-out for users that can
+   *  seed the demo call (e.g. the TEST_CC user). */
+  readonly addDemoCallButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -29,6 +32,14 @@ export class HomePage extends BasePage {
     this.resetPasswordButton = page.locator('[aria-label="Reset Password"]');
     this.homeNavLink = page.locator('a[aria-label="Home"]');
     this.callListingNavLink = page.locator('a[aria-label="Call Listing"]');
+    this.addDemoCallButton = page.getByRole('button', { name: 'Add Demo Call' });
+  }
+
+  /** Opens the profile fly-out and clicks "Add Demo Call" to seed the demo call.
+   *  Available only for users that expose the action. */
+  async addDemoCall(): Promise<void> {
+    await this.userInfoMenu.hover();
+    await this.addDemoCallButton.click();
   }
 
   /** True when the authenticated shell is rendered. */
