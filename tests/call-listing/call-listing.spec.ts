@@ -101,17 +101,42 @@ test.describe('Call Listing — priority 1', () => {
     await expect(header).toHaveAttribute('aria-sort', 'descending');
   });
 
+  // 7525 — Date Range filter, selection steps only. Each preset is chosen in the
+  // editor, confirmed and applied, and the active-filter label must update. The
+  // RESULT of filtering (which rows show) is deliberately not asserted yet —
+  // the current company has no calls across dates; once a company with calls is
+  // available we extend this to verify the filtered rows.
+  test('7525 selecting each Date Range preset updates the active filter', async ({ callListingPage }) => {
+    test.setTimeout(150_000);
+    for (const preset of CallListingPage.DATE_RANGE_PRESETS) {
+      await callListingPage.selectDateRange(preset);
+      await expect(callListingPage.dateRangeLabel).toContainText(preset);
+    }
+  });
+
+  // 33298 — choosing "Custom Date Range" reveals the From/To date pickers and the
+  // editor stays open (the picker is not closed). The "To" field appears only in
+  // custom mode, so its presence + the still-visible OK button prove the editor
+  // remained open. Deeper calendar interaction can be added once data exists.
+  test('33298 Custom Date Range opens the date picker and keeps it open', async ({ page, callListingPage }) => {
+    await callListingPage.openCustomDateRange();
+    await expect(callListingPage.dateRangeCombobox).toContainText('Custom Date Range');
+    await expect(page.getByText('To', { exact: true })).toBeVisible();
+    await expect(callListingPage.dateRangeOkButton).toBeVisible();
+  });
+
   // ── Remaining priority-1 Call Listing cases ────────────────────────────────
   // Tracked but not yet implemented. Grouped by what they need:
   //
-  //  Need seeded calls in the date range (account has ~2 calls):
+  //  Need calls in the date range (current company has none — use the demo call
+  //  "CC Test 1" / a second company once available):
   //    7521 single-call playback · 7553 PCI zone on oscillogram
   //    7575 single download · 7550 bulk download · 7557 export to Excel
   //    33254 unique ZIPs for concurrent bulk downloads
+  //    7525 verifying the FILTERED ROWS after applying a Date Range (selection
+  //         steps are covered above; row assertions pending data)
   //  Send real emails from staging (need a safe target + assertion strategy):
   //    7555 share calls · 7556 email calls
   //  Mutate/destroy shared-account data (need explicit go-ahead + cleanup):
   //    7560 delete calls · 7571 enable legal hold · 34922 disable legal hold
-  //  Advanced Filters date-range behaviour:
-  //    7525 each date-range option filters · 33298 datepicker stays open on custom range
 });
