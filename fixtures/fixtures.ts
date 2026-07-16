@@ -4,6 +4,9 @@ import { ForgotPasswordPage } from '../pages/login/ForgotPasswordPage';
 import { HomePage } from '../pages/home/HomePage';
 import { ResetPasswordPage } from '../pages/password-reset/ResetPasswordPage';
 import { CallListingPage } from '../pages/call-listing/CallListingPage';
+import { ChatListingPage } from '../pages/chat-listing/ChatListingPage';
+import { ChatViewModal } from '../pages/chat-listing/ChatViewModal';
+import { EditColumnsPanel } from '../pages/chat-listing/EditColumnsPanel';
 
 /**
  * Page Object fixtures.
@@ -24,6 +27,9 @@ type PageObjects = {
   homePage: HomePage;
   resetPasswordPage: ResetPasswordPage;
   callListingPage: CallListingPage;
+  chatListingPage: ChatListingPage;
+  chatViewModal: ChatViewModal;
+  editColumnsPanel: EditColumnsPanel;
 };
 
 export const test = base.extend<PageObjects>({
@@ -41,6 +47,15 @@ export const test = base.extend<PageObjects>({
   },
   callListingPage: async ({ page }, use) => {
     await use(new CallListingPage(page));
+  },
+  chatListingPage: async ({ page }, use) => {
+    await use(new ChatListingPage(page));
+  },
+  chatViewModal: async ({ page }, use) => {
+    await use(new ChatViewModal(page));
+  },
+  editColumnsPanel: async ({ page }, use) => {
+    await use(new EditColumnsPanel(page));
   },
 });
 
