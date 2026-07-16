@@ -10,15 +10,14 @@ import { test, expect } from '../../fixtures/fixtures';
  * --workers=1 alongside the other authenticated suites.
  *
  * Data prerequisites (staging, company Charl_Test, as of 2026-07-16):
- *   - the This Year range returns exactly BASELINE_ROWS chats;
+ *   - the This Year range returns at least one chat;
  *   - "Hi" exists inside a chat message body; "Charl" only in the Agent column.
- * If the test account or its chat data changes, re-verify these constants.
+ * The row baseline is captured at runtime (the This Year count already drifted
+ * 12 -> 6 within a day on staging, so it must not be hard-coded).
  */
 const VALID_EMAIL = process.env.TEST_EMAIL;
 const VALID_PASSWORD = process.env.TEST_PASSWORD;
 
-// Baseline for company Charl_Test with the This Year range, as of 2026-07-16.
-const BASELINE_ROWS = 12;
 // Text that exists inside a chat message body, not in any grid column.
 const MESSAGE_TEXT = 'Hi';
 
@@ -31,6 +30,10 @@ test.describe('Chat Listing — Search Chats', () => {
     'Set TEST_EMAIL and TEST_PASSWORD in .env to run authenticated tests',
   );
 
+  // Unfiltered This Year row count, captured per test — the reference point for
+  // "search narrows results" / "clear restores the full set" assertions.
+  let baselineRows: number;
+
   test.beforeEach(async ({ page, loginPage, chatListingPage }) => {
     await loginPage.goto();
     await loginPage.login(VALID_EMAIL!, VALID_PASSWORD!);
@@ -40,7 +43,8 @@ test.describe('Chat Listing — Search Chats', () => {
     await chatListingPage.dismissAnnouncement();
     // Default range is Last 7 Days and returns nothing — see specs/chat-listing-map.md
     await chatListingPage.setDateRange('This Year');
-    expect(await chatListingPage.rowCount()).toBe(BASELINE_ROWS);
+    baselineRows = await chatListingPage.rowCount();
+    expect(baselineRows, 'This Year must return chats to search within').toBeGreaterThan(0);
   });
 
   // End the session so the shared account doesn't stay logged in for the next test.
@@ -65,7 +69,7 @@ test.describe('Chat Listing — Search Chats', () => {
     await chatListingPage.applySearch();
     const n = await chatListingPage.rowCount();
     expect(n).toBeGreaterThan(0);
-    expect(n).toBeLessThan(BASELINE_ROWS);
+    expect(n).toBeLessThan(baselineRows);
   });
 
   test('does not match grid metadata — agent name yields no results', async ({ chatListingPage }) => {
@@ -89,7 +93,7 @@ test.describe('Chat Listing — Search Chats', () => {
     await chatListingPage.clearSearch();
     const terms = await chatListingPage.searchTerms();
     expect(terms).not.toContain(MESSAGE_TEXT);
-    expect(await chatListingPage.rowCount()).toBe(BASELINE_ROWS);
+    expect(await chatListingPage.rowCount()).toBe(baselineRows);
   });
 
   test('Add with an empty input adds nothing', async ({ chatListingPage }) => {
