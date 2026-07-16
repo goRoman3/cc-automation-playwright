@@ -1,3 +1,8 @@
+# ── WIP: STT for new extensions (draft — exclude from commits for now) ────────
+pages/extension-management/
+pages/admin-report/
+tests/extension-management/
+
 # ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
 package-lock.json
