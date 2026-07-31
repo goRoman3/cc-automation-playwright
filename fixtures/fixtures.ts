@@ -2,7 +2,9 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/login/LoginPage';
 import { ForgotPasswordPage } from '../pages/login/ForgotPasswordPage';
 import { HomePage } from '../pages/home/HomePage';
+import { CompanySelector } from '../pages/home/CompanySelector';
 import { ResetPasswordPage } from '../pages/password-reset/ResetPasswordPage';
+import { QAScorecardsPage } from '../pages/qa-scorecards/QAScorecardsPage';
 
 /**
  * Page Object fixtures.
@@ -21,7 +23,9 @@ type PageObjects = {
   loginPage: LoginPage;
   forgotPasswordPage: ForgotPasswordPage;
   homePage: HomePage;
+  companySelector: CompanySelector;
   resetPasswordPage: ResetPasswordPage;
+  qaScorecardsPage: QAScorecardsPage;
 };
 
 export const test = base.extend<PageObjects>({
@@ -34,8 +38,14 @@ export const test = base.extend<PageObjects>({
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));
   },
+  companySelector: async ({ page }, use) => {
+    await use(new CompanySelector(page));
+  },
   resetPasswordPage: async ({ page }, use) => {
     await use(new ResetPasswordPage(page));
+  },
+  qaScorecardsPage: async ({ page }, use) => {
+    await use(new QAScorecardsPage(page));
   },
 });
 
