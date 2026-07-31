@@ -3,6 +3,9 @@ import { LoginPage } from '../pages/login/LoginPage';
 import { ForgotPasswordPage } from '../pages/login/ForgotPasswordPage';
 import { HomePage } from '../pages/home/HomePage';
 import { ResetPasswordPage } from '../pages/password-reset/ResetPasswordPage';
+import { AnalyticsSettingsPage } from '../pages/analytics-settings/AnalyticsSettingsPage';
+import { DataManagementPage } from '../pages/analytics-settings/DataManagementPage';
+import { SentimentAdjustmentsPage } from '../pages/analytics-settings/SentimentAdjustmentsPage';
 
 /**
  * Page Object fixtures.
@@ -22,6 +25,9 @@ type PageObjects = {
   forgotPasswordPage: ForgotPasswordPage;
   homePage: HomePage;
   resetPasswordPage: ResetPasswordPage;
+  analyticsSettingsPage: AnalyticsSettingsPage;
+  dataManagementPage: DataManagementPage;
+  sentimentAdjustmentsPage: SentimentAdjustmentsPage;
 };
 
 export const test = base.extend<PageObjects>({
@@ -36,6 +42,15 @@ export const test = base.extend<PageObjects>({
   },
   resetPasswordPage: async ({ page }, use) => {
     await use(new ResetPasswordPage(page));
+  },
+  analyticsSettingsPage: async ({ page }, use) => {
+    await use(new AnalyticsSettingsPage(page));
+  },
+  dataManagementPage: async ({ page }, use) => {
+    await use(new DataManagementPage(page));
+  },
+  sentimentAdjustmentsPage: async ({ page }, use) => {
+    await use(new SentimentAdjustmentsPage(page));
   },
 });
 
