@@ -29,6 +29,10 @@ export class LoginPage extends BasePage {
   // "Already logged in on another computer" modal (its own page object)
   readonly modal: AlreadyLoggedInModal;
 
+  // One-time announcement modal (e.g. "Action Required: API Platform
+  // Update") shown on the start page right after login.
+  readonly announcementModalCloseButton: Locator;
+
   constructor(page: Page) {
     super(page);
     this.modal = new AlreadyLoggedInModal(page);
@@ -55,6 +59,8 @@ export class LoginPage extends BasePage {
     this.termsLink = page.getByRole('link', { name: 'Terms & Conditions' });
     this.privacyLink = page.getByRole('link', { name: 'Privacy Policy' });
     this.supportLink = page.getByRole('link', { name: 'Support' });
+
+    this.announcementModalCloseButton = page.getByRole('button', { name: 'Close modal' });
   }
 
   async submitEmpty() {
@@ -84,18 +90,33 @@ export class LoginPage extends BasePage {
    * a force-logout sometimes bounces back to the login form instead of finishing,
    * re-submits the credentials until we land on /Home. Re-submitting always uses
    * the Login button — the submit mechanism only matters for the first attempt.
+   * Once on the start page, also dismisses the one-time announcement modal
+   * (see `dismissAnnouncementModal`) so it can't intercept later clicks.
    */
   async completeLogin(email: string, password: string) {
     for (let attempt = 1; attempt <= 3; attempt++) {
-      if (this.page.url().includes('/Home')) return;
+      if (this.page.url().includes('/Home')) return this.dismissAnnouncementModal();
       await this.clearActiveSessionModal();
-      if (this.page.url().includes('/Home')) return;
+      if (this.page.url().includes('/Home')) return this.dismissAnnouncementModal();
       // No modal / bounced back to the form — submit again to complete login.
       await this.submitCredentials(email, password);
     }
 
     // Never reached /Home — let the caller's assertion report the real state.
     await this.page.waitForURL('/Home', { timeout: 20_000 });
+    await this.dismissAnnouncementModal();
+  }
+
+  /**
+   * Closes the one-time "Action Required" announcement modal that some
+   * accounts see on the start page right after login. It reuses the app's
+   * generic full-screen modal wrapper and, left open, intercepts clicks on
+   * the header (e.g. the user-info menu). Best-effort: a no-op when the
+   * modal doesn't appear (e.g. previously dismissed with "Do not show
+   * again").
+   */
+  private async dismissAnnouncementModal(): Promise<void> {
+    await this.announcementModalCloseButton.click({ timeout: 5_000 }).catch(() => {});
   }
 
   /** Fills credentials and clicks Login. Waits out any leftover modal overlay
