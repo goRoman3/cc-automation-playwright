@@ -45,7 +45,7 @@ test.describe('Login page', () => {
   // ──────────────────────────────────────────────
   // 3.1 Required page elements
   // ──────────────────────────────────────────────
-  test.describe('3.1 Required page elements', () => {
+  test.describe('3.1 Required page elements @elements', () => {
     test('page has correct title', async ({ page }) => {
       await expect(page).toHaveTitle('Smarsh Login');
     });
@@ -95,11 +95,11 @@ test.describe('Login page', () => {
   // 3.2 Input placeholders
   // ──────────────────────────────────────────────
   test.describe('3.2 Input placeholders', () => {
-    test('email input shows placeholder "Email Address"', async ({ page }) => {
+    test('email input shows placeholder "Email Address" @elements', async ({ page }) => {
       await expect(page.getByPlaceholder('Email Address')).toBeVisible();
     });
 
-    test('password input shows placeholder "Password"', async ({ page }) => {
+    test('password input shows placeholder "Password" @elements', async ({ page }) => {
       await expect(page.getByPlaceholder('Password')).toBeVisible();
     });
 

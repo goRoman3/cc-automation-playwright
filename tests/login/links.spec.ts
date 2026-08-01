@@ -14,22 +14,22 @@ test.describe('6826 Login page links redirect correctly', () => {
     await loginPage.goto();
   });
 
-  test('Terms & Conditions link points to the terms page', async ({ loginPage }) => {
+  test('Terms & Conditions link points to the terms page @elements', async ({ loginPage }) => {
     await expect(loginPage.termsLink).toHaveAttribute('href', /terms-and-conditions/);
   });
 
-  test('Privacy Policy link points to the privacy page', async ({ loginPage }) => {
+  test('Privacy Policy link points to the privacy page @elements', async ({ loginPage }) => {
     await expect(loginPage.privacyLink).toHaveAttribute('href', /privacy-policy/);
   });
 
-  test('Support link points to the support portal', async ({ loginPage }) => {
+  test('Support link points to the support portal @elements', async ({ loginPage }) => {
     // Azure case 6826 documents support.callcabinet.com, but the rebranded app
     // now links to the Smarsh support portal (central.smarsh.com). Asserting the
     // live target; flag to QA to refresh the manual case.
     await expect(loginPage.supportLink).toHaveAttribute('href', /smarsh\.com/);
   });
 
-  test('"visit our Website" link points to callcabinet.com', async ({ page }) => {
+  test('"visit our Website" link points to callcabinet.com @elements', async ({ page }) => {
     const websiteLink = page.getByRole('link', { name: /visit our Website/i });
     await expect(websiteLink).toHaveAttribute('href', /callcabinet\.com/);
   });

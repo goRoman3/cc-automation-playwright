@@ -53,7 +53,7 @@ test.describe('Call Listing — priority 1', () => {
     }
   });
 
-  test('page loads with the grid and the action toolbar', async ({ callListingPage }) => {
+  test('page loads with the grid and the action toolbar @elements', async ({ callListingPage }) => {
     await expect(callListingPage.grid).toBeVisible();
     await expect(callListingPage.playButton).toBeVisible();
     await expect(callListingPage.exportToExcelButton).toBeVisible();

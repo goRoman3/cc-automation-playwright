@@ -17,6 +17,7 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['list'],
+    ['./reporters/table-reporter.ts'],
   ],
   use: {
     baseURL: process.env.BASE_URL,
