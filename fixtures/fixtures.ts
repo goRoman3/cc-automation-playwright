@@ -2,7 +2,11 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/login/LoginPage';
 import { ForgotPasswordPage } from '../pages/login/ForgotPasswordPage';
 import { HomePage } from '../pages/home/HomePage';
+import { CompanySelector } from '../pages/home/CompanySelector';
 import { ResetPasswordPage } from '../pages/password-reset/ResetPasswordPage';
+import { AiAgentPage } from '../pages/ai-agent-notification/AiAgentPage';
+import { NotificationsPage } from '../pages/notifications/NotificationsPage';
+import { NotificationWizard } from '../pages/notifications/NotificationWizard';
 
 /**
  * Page Object fixtures.
@@ -21,7 +25,11 @@ type PageObjects = {
   loginPage: LoginPage;
   forgotPasswordPage: ForgotPasswordPage;
   homePage: HomePage;
+  companySelector: CompanySelector;
   resetPasswordPage: ResetPasswordPage;
+  aiAgentPage: AiAgentPage;
+  notificationsPage: NotificationsPage;
+  notificationWizard: NotificationWizard;
 };
 
 export const test = base.extend<PageObjects>({
@@ -34,8 +42,20 @@ export const test = base.extend<PageObjects>({
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));
   },
+  companySelector: async ({ page }, use) => {
+    await use(new CompanySelector(page));
+  },
   resetPasswordPage: async ({ page }, use) => {
     await use(new ResetPasswordPage(page));
+  },
+  aiAgentPage: async ({ page }, use) => {
+    await use(new AiAgentPage(page));
+  },
+  notificationsPage: async ({ page }, use) => {
+    await use(new NotificationsPage(page));
+  },
+  notificationWizard: async ({ page }, use) => {
+    await use(new NotificationWizard(page));
   },
 });
 
