@@ -18,6 +18,17 @@ interface Row {
 
 const OUTPUT_DIR = path.join(process.cwd(), '.ai-reports');
 const STATE_FILE = path.join(OUTPUT_DIR, '.state.json');
+const RUNS_DIR = path.join(OUTPUT_DIR, 'runs');
+const TIMESTAMP_FILE = path.join(OUTPUT_DIR, '.run-timestamp');
+
+/** Sortable, filesystem-safe timestamp, e.g. `2026-08-04_14-32-05`. */
+function formatTimestamp(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`
+  );
+}
 
 const LABEL: Record<Outcome, string> = {
   expected: 'PASS',
@@ -61,11 +72,19 @@ const SECTION_HINT: Record<Category, string> = {
  * previous phase's rows instead of starting over — so the final report
  * covers both phases. A plain single-invocation run (TEST_REPORT_APPEND
  * unset) always starts fresh.
+ *
+ * Every run also gets a timestamped snapshot under `.ai-reports/runs/`, in
+ * addition to the fixed `test-report.{md,html}` (which always reflects only
+ * the latest run) — otherwise each run overwrites the last with no history.
+ * Both phases of a two-phase run share one timestamp (persisted to
+ * `.ai-reports/.run-timestamp` alongside the row state) so they land in the
+ * same run folder instead of splitting across two.
  */
 export default class TableReporter implements Reporter {
   // Keyed by test.id so retries overwrite the earlier attempt instead of
   // appending duplicate rows, while keeping first-seen ordering.
   private rows = new Map<string, Row>();
+  private runTimestamp = '';
 
   onBegin(): void {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -76,6 +95,15 @@ export default class TableReporter implements Reporter {
       } catch {
         // No state from a prior phase (or it's corrupt) — carry on empty.
       }
+      try {
+        this.runTimestamp = fs.readFileSync(TIMESTAMP_FILE, 'utf-8').trim();
+      } catch {
+        // No timestamp from a prior phase — fall through and mint a new one.
+      }
+    }
+    if (!this.runTimestamp) {
+      this.runTimestamp = formatTimestamp(new Date());
+      fs.writeFileSync(TIMESTAMP_FILE, this.runTimestamp, 'utf-8');
     }
   }
 
@@ -103,8 +131,15 @@ export default class TableReporter implements Reporter {
   onEnd(result: FullResult): void {
     const rows = [...this.rows.values()];
     fs.writeFileSync(STATE_FILE, JSON.stringify(rows), 'utf-8');
-    this.writeMarkdown(result, rows);
-    this.writeHtml(result, rows);
+
+    const runDir = path.join(RUNS_DIR, this.runTimestamp);
+    fs.mkdirSync(runDir, { recursive: true });
+
+    // Fixed "latest" files, plus a timestamped snapshot for run-over-run history.
+    for (const dir of [OUTPUT_DIR, runDir]) {
+      this.writeMarkdown(dir, result, rows);
+      this.writeHtml(dir, result, rows);
+    }
   }
 
   private summarize(rows: Row[]) {
@@ -124,11 +159,12 @@ export default class TableReporter implements Reporter {
       .filter((section) => section.rows.length > 0);
   }
 
-  private writeMarkdown(result: FullResult, rows: Row[]): void {
+  private writeMarkdown(dir: string, result: FullResult, rows: Row[]): void {
     const { total, passed, failed, flaky, skipped } = this.summarize(rows);
     const lines = [
       '# Playwright Test Report',
       '',
+      `Run: ${this.runTimestamp}`,
       `Generated: ${new Date().toISOString()}`,
       `Overall: **${result.status.toUpperCase()}**`,
       `Total: ${total} — Passed: ${passed} — Failed: ${failed} — Flaky: ${flaky} — Skipped: ${skipped}`,
@@ -153,10 +189,10 @@ export default class TableReporter implements Reporter {
       );
     }
 
-    fs.writeFileSync(path.join(OUTPUT_DIR, 'test-report.md'), lines.join('\n') + '\n', 'utf-8');
+    fs.writeFileSync(path.join(dir, 'test-report.md'), lines.join('\n') + '\n', 'utf-8');
   }
 
-  private writeHtml(result: FullResult, rows: Row[]): void {
+  private writeHtml(dir: string, result: FullResult, rows: Row[]): void {
     const { total, passed, failed, flaky, skipped } = this.summarize(rows);
 
     const sectionsHtml = this.bySection(rows)
@@ -230,7 +266,7 @@ export default class TableReporter implements Reporter {
 </head>
 <body>
   <h1>Playwright Test Report</h1>
-  <div class="meta">Generated ${new Date().toLocaleString()} · Overall: ${result.status.toUpperCase()}</div>
+  <div class="meta">Run ${escapeHtml(this.runTimestamp)} · Generated ${new Date().toLocaleString()} · Overall: ${result.status.toUpperCase()}</div>
   <div class="stats">
     <div class="stat stat-total"><span class="num">${total}</span>Total</div>
     <div class="stat stat-passed"><span class="num">${passed}</span>Passed</div>
@@ -242,7 +278,7 @@ ${sectionsHtml}
 </body>
 </html>`;
 
-    fs.writeFileSync(path.join(OUTPUT_DIR, 'test-report.html'), html, 'utf-8');
+    fs.writeFileSync(path.join(dir, 'test-report.html'), html, 'utf-8');
   }
 }
 
