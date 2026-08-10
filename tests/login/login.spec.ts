@@ -2,6 +2,7 @@ import { test, expect } from '../../fixtures/fixtures';
 import { type Page } from '@playwright/test';
 import { LoginPage } from '../../pages/login/LoginPage';
 import { HomePage } from '../../pages/home/HomePage';
+import { resilientGoto } from '../../helpers/navigate';
 
 /**
  * Ends the server-side session for a page that is sitting on the authenticated
@@ -199,7 +200,13 @@ test.describe('Login page', () => {
       await loginPage.emailInput.fill('user@');
       await loginPage.passwordInput.fill(WRONG_PASSWORD);
       await loginPage.loginButton.click();
-      await expect(loginPage.invalidCredentialsError).toBeVisible();
+      // Same rate-limit-aware wait/assertion as the sibling tests above — the
+      // shared account can be in a "locked out" state by the time this runs,
+      // which responds slightly slower than a plain "Invalid credentials".
+      await expect(loginPage.invalidCredentialsError).toBeVisible({ timeout: 10_000 });
+      await expect(loginPage.invalidCredentialsError).toContainText(
+        /Invalid credentials|You've been locked out/
+      );
     });
 
     test('does not navigate away from login page on invalid email', async ({ page, loginPage }) => {
@@ -273,7 +280,7 @@ test.describe('Login page', () => {
     test('login page is not accessible after successful login', async ({ page, loginPage }) => {
       await loginPage.login(VALID_EMAIL!, VALID_PASSWORD!);
       await page.waitForURL('/Home', { timeout: 20_000 });
-      await page.goto('/');
+      await resilientGoto(page, '/');
       // Authenticated users should be redirected away from the login page
       await expect(page).not.toHaveURL('/', { timeout: 10_000 });
     });

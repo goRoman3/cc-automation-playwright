@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { resilientGoto } from '../../helpers/navigate';
 
 /**
  * Azure Login case 6876 — Verify the Login form does not reveal security
@@ -19,7 +20,7 @@ const SECRET_PATTERNS: { name: string; re: RegExp }[] = [
 
 test.describe('6876 Login page source does not leak secrets', () => {
   test('served HTML contains no security information', async ({ page }) => {
-    await page.goto('/');
+    await resilientGoto(page, '/');
     const html = await page.content();
 
     for (const { name, re } of SECRET_PATTERNS) {
