@@ -1,5 +1,6 @@
 import { test, expect } from '../../fixtures/fixtures';
 import { PROTECTED_ROUTES } from '../../fixtures/protected-routes';
+import { resilientGoto } from '../../helpers/navigate';
 
 /**
  * Azure Login case 6875 — Verify the impossibility of reaching the system with
@@ -19,7 +20,7 @@ test.describe('6875 Unauthorized direct-URL access is blocked', () => {
 
   for (const route of PROTECTED_ROUTES) {
     test(`redirects to login when opening ${route}`, async ({ page, loginPage }) => {
-      await page.goto(route);
+      await resilientGoto(page, route);
 
       // Login form is shown → protected content was not rendered (access denied).
       await expect(loginPage.emailInput).toBeVisible({ timeout: 15_000 });
