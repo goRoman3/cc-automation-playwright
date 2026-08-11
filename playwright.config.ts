@@ -18,6 +18,7 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report' }],
     ['list'],
     ['./reporters/table-reporter.ts'],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
   ],
   use: {
     baseURL: process.env.BASE_URL,
