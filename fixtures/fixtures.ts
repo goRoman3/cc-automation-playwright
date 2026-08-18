@@ -7,6 +7,10 @@ import { CallListingPage } from '../pages/call-listing/CallListingPage';
 import { ChatListingPage } from '../pages/chat-listing/ChatListingPage';
 import { ChatViewModal } from '../pages/chat-listing/ChatViewModal';
 import { EditColumnsPanel } from '../pages/chat-listing/EditColumnsPanel';
+import { CompanySelector } from '../pages/shared/CompanySelector';
+import { AiAgentPage } from '../pages/ai-agent/AiAgentPage';
+import { QAScorecardsPage } from '../pages/qa-scorecards/QAScorecardsPage';
+import { ScorecardEditorPage } from '../pages/qa-scorecards/ScorecardEditorPage';
 
 /**
  * Page Object fixtures.
@@ -30,6 +34,10 @@ type PageObjects = {
   chatListingPage: ChatListingPage;
   chatViewModal: ChatViewModal;
   editColumnsPanel: EditColumnsPanel;
+  companySelector: CompanySelector;
+  aiAgentPage: AiAgentPage;
+  qaScorecardsPage: QAScorecardsPage;
+  scorecardEditorPage: ScorecardEditorPage;
 };
 
 export const test = base.extend<PageObjects>({
@@ -56,6 +64,18 @@ export const test = base.extend<PageObjects>({
   },
   editColumnsPanel: async ({ page }, use) => {
     await use(new EditColumnsPanel(page));
+  },
+  companySelector: async ({ page }, use) => {
+    await use(new CompanySelector(page));
+  },
+  aiAgentPage: async ({ page }, use) => {
+    await use(new AiAgentPage(page));
+  },
+  qaScorecardsPage: async ({ page }, use) => {
+    await use(new QAScorecardsPage(page));
+  },
+  scorecardEditorPage: async ({ page }, use) => {
+    await use(new ScorecardEditorPage(page));
   },
 });
 
