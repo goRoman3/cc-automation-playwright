@@ -93,14 +93,19 @@ export class ScorecardEditorPage extends BasePage {
    * section names (asked for "resolution time", got a section named
    * "Resolution Efficiency" — same concept, different wording), so an exact
    * substring match is stricter than what "covers this focus area"
-   * actually means here.
+   * actually means here. Hyphens are normalized to spaces before comparing
+   * for the same reason — asked for "next-steps confirmation", got a
+   * section literally named "Next Steps": same concept, but the hyphen vs.
+   * space difference alone made every substring/word check miss it.
    */
   async assertCoversFocusAreas(focusAreas: readonly string[]): Promise<void> {
+    const normalize = (s: string) => s.toLowerCase().replace(/-/g, ' ').trim();
+
     const rows = await this.getSectionsAndQuestions();
-    const sections = [...new Set(rows.map(r => r.section.toLowerCase()))];
+    const sections = [...new Set(rows.map(r => normalize(r.section)))];
 
     for (const area of focusAreas) {
-      const needle = area.toLowerCase();
+      const needle = normalize(area);
       const areaWords = needle.split(/\s+/).filter(w => w.length > 3);
       const covered = sections.some(
         s => s.includes(needle) || needle.includes(s) || areaWords.some(w => s.includes(w)),
@@ -126,13 +131,17 @@ export class ScorecardEditorPage extends BasePage {
    * whatever name arrived pre-filled, e.g. from the AI Agent), and confirms.
    * Returns the exact name saved, for the caller to verify/clean up by.
    *
-   * Waits for the dialog itself to close before checking the URL — matching
-   * the URL alone was observed to be unreliable: `waitForURL` was seen to
-   * be satisfied (the pattern matched at least once) even on a run where
-   * the app then bounced back into the editor, dialog gone, save presumably
-   * not actually committed. The dialog closing is a more direct signal that
-   * the click was actually processed rather than just briefly reflected in
-   * history.
+   * Waits on the `SaveNewForm` network response, not UI timing (dialog
+   * closing / URL change) — those were both observed to be unreliable
+   * signals of the actual save outcome. Concretely: a run that timed out
+   * waiting for the Save button to become hidden (20s) turned out to have
+   * saved successfully anyway — the form showed up in the listing under an
+   * account this suite doesn't otherwise use, confirmed by its timestamped
+   * unique name matching that exact run. The backend had returned 201
+   * `Created` for `SaveNewForm`; only the UI's own transition back to the
+   * listing was slow that time. So the network response is the real
+   * pass/fail signal here, and the follow-up `waitForURL` is best-effort —
+   * informational, not something a slow UI redraw should be able to fail.
    */
   async saveAndExit(): Promise<string> {
     await dismissAnnouncementModal(this.page);
@@ -149,9 +158,14 @@ export class ScorecardEditorPage extends BasePage {
     // human would, so a dismiss earlier in the method isn't enough on its
     // own; every click in this file re-checks immediately before it fires.
     await dismissAnnouncementModal(this.page);
+    const saved = this.page.waitForResponse(
+      resp => resp.url().includes('/api/qc/quality/SaveNewForm') && resp.ok(),
+      { timeout: 30_000 },
+    );
     await this.saveDialogSaveButton.click();
-    await this.saveDialogSaveButton.waitFor({ state: 'hidden', timeout: 20_000 });
-    await this.page.waitForURL(/\/QAScorecards$/, { timeout: 15_000 });
+    await saved;
+
+    await this.page.waitForURL(/\/QAScorecards$/, { timeout: 30_000 }).catch(() => {});
 
     return uniqueName;
   }
