@@ -19,6 +19,10 @@ dist/
 *.md
 agents/
 specs/
+# …but the dev-portal matrix docs ARE deliverables (tracked-status ledger +
+# generated catalogue render) — force-track them (last match wins).
+!tests/dev-portal/UNVERIFIED.md
+!tests/dev-portal/cross-tenant-catalog.md
 
 # ── Auth state ────────────────────────────────────────────────────────────────
 .auth/
@@ -39,6 +43,10 @@ CLAUDE.local.md
 /playwright/.cache/
 .playwright-mcp/
 *.log
+
+# ── Tenant-isolation phase1/phase2 baseline (local-only, session-specific) ───
+.tenant-isolation-baseline.json
+.tenant-isolation-negative-writes-baseline.json
 
 # ── AI analysis outputs ───────────────────────────────────────────────────────
 .ai-reports/
@@ -65,3 +73,18 @@ Thumbs.db
 # ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
+
+# ── Dev Portal evidence packages (force-tracked) ─────────────────────────────
+# The broad rules above (*.md line 19, screenshots/ traces/ *.png *.zip) would
+# otherwise drop the whole evidence bundle. Re-include it here (last match wins).
+# Tracked: all .md reports, raw/*.json captures, and screenshot .png files.
+# NOT tracked: Playwright trace .zip files — they are large binaries; keep them
+# in /test-results/ or move to git-lfs, then add `!artifacts/**/*.zip` if needed.
+!artifacts/
+!artifacts/dev-portal-evidence-*/
+!artifacts/dev-portal-evidence-*/**/
+!artifacts/dev-portal-evidence-*/screenshots/
+!artifacts/dev-portal-evidence-*/traces/
+!artifacts/dev-portal-evidence-*/**/*.md
+!artifacts/dev-portal-evidence-*/**/*.json
+!artifacts/dev-portal-evidence-*/**/*.png

@@ -1,0 +1,269 @@
+{
+  "precondition": {
+    "timestamp": "2026-08-29T10:12:47.961Z",
+    "app": "https://atmossystemsstaging.callcabinet.com (TWO s)",
+    "developerPortal": "https://developer1-portal.callcabinet.com",
+    "gateway": "https://developer1.callcabinet.com",
+    "company": "CC Test 1",
+    "account": "romana@callcabinet.com",
+    "subscriptionKey": "Primary: API_test",
+    "currentSiteId": "8cc22cd2-a4b7-46c5-b907-9050e110dac5",
+    "currentSiteName": "UA team recording",
+    "gitBranch": "feature/chat-listing",
+    "gitCommit": "ed251c2"
+  },
+  "callId": "d71ac345-86a0-f111-9b33-6045bded66d5",
+  "control": {
+    "status": -1,
+    "body": null,
+    "threw": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\""
+  },
+  "omitStart": {
+    "status": -1,
+    "threw": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"",
+    "elapsedMs": 34969,
+    "requestFired": true,
+    "capturedCalls": [
+      {
+        "url": "https://developer1.callcabinet.com/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+        "status": null,
+        "latencyMs": 29973,
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  },
+  "omitEnd": {
+    "status": -1,
+    "threw": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"",
+    "elapsedMs": 35611,
+    "requestFired": false,
+    "capturedCalls": []
+  },
+  "calls": [
+    {
+      "seq": 136,
+      "startedAt": "2026-08-29T10:12:44.875Z",
+      "method": "OPTIONS",
+      "url": "https://developer1.callcabinet.com/api/reports/call-statistics/get-sites-usage/",
+      "pathname": "/api/reports/call-statistics/get-sites-usage/",
+      "query": {},
+      "requestHeaders": {
+        "accept": "*/*",
+        "access-control-request-headers": "cache-control,cra-api-key,x-ms-client-request-id",
+        "access-control-request-method": "GET",
+        "origin": "https://developer1-portal.callcabinet.com",
+        "sec-fetch-mode": "cors",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.7778.96 Safari/537.36"
+      },
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "accept-ranges": "bytes",
+        "access-control-allow-headers": "cache-control,cra-api-key,x-ms-client-request-id",
+        "access-control-allow-methods": "GET",
+        "access-control-allow-origin": "*",
+        "content-length": "0",
+        "date": "Sat, 29 Aug 2026 10:12:46 GMT",
+        "strict-transport-security": "max-age=15552000; includeSubDomains; preloadmax-age=15552000; includeSubDomains; preload",
+        "x-azure-ref": "20260829T101245Z-1799784c76b6jbqhhC1WAW4fgs0000000fag00000000355e",
+        "x-cache": "CONFIG_NOCACHE"
+      },
+      "responseBody": "<unreadable>",
+      "latencyMs": 536,
+      "fired": true,
+      "failure": null
+    },
+    {
+      "seq": 137,
+      "startedAt": "2026-08-29T10:12:44.885Z",
+      "method": "GET",
+      "url": "https://developer1.callcabinet.com/api/reports/call-statistics/get-sites-usage/",
+      "pathname": "/api/reports/call-statistics/get-sites-usage/",
+      "query": {},
+      "requestHeaders": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "cra-api-key": "<redacted len=32>",
+        "cache-control": "no-cache",
+        "referer": "https://developer1-portal.callcabinet.com/",
+        "accept-language": "en-US",
+        "sec-ch-ua": "\"Chromium\";v=\"148\", \"HeadlessChrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "x-ms-client-request-id": "dbec052e-fdf7-9922-81a5-17b63d684039",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.7778.96 Safari/537.36",
+        "accept": "*/*"
+      },
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "strict-transport-security": "max-age=15552000; includeSubDomains; preloadmax-age=15552000; includeSubDomains; preloadmax-age=15552000; includeSubDomains; preload",
+        "content-security-policy": "default-src 'self'; style-src 'self' https://fonts.googleapis.com/css https://microsoft.github.io/PowerBI-JavaScript/demo/node_modules/powerbi-client/dist/powerbi.css 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com/gtag/js https://az416426.vo.msecnd.net/scripts/a/ai.0.js https://www.google-analytics.com/analytics.js https://www.google-analytics.com/j https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js https://d2yyd1h5u9mauk.cloudfront.net/integrations/web/v1/library/ohX53ID38Gc8eUWa/delighted.js; img-src 'self' data: https://www.google-analytics.com/ https://www.googletagmanager.com https://shield.sitelock.com/shield/secure.callcabinet.com https://atmossystemsstaging.callcabinet.com/Content/Images/MailTemplates/Atmos-Mailer-Header-Logo.png https://atmos.callcabinet.com/Content/Images/MailTemplates/Atmos-Mailer-Header-Logo.png; font-src 'self' data: https://fonts.gstatic.com/; frame-src 'self' https://vars.hotjar.com/ https://app.powerbi.com/reportEmbed; connect-src 'self' https://api.callcabinet.com/ https://secure.callcabinet.com/ https://atmossystemsstaging.callcabinet.com/ https://in.hotjar.com/api/v1/client/sites/831725/visit-data https://vc.hotjar.io/views/ https://dc.services.visualstudio.com/ https://www.google-analytics.com wss://ws.pusherapp.com/ https://eventgw.twilio.com/ https://media.twiliocdn.com wss://chunderw-vpc-gll.twilio.com https://web.delighted.com; media-src data: 'self' *; frame-ancestors 'self'; object-src 'none';",
+        "access-control-expose-headers": "Date,Transfer-Encoding,Connection,Content-Security-Policy,Content-Security-Policy-Report-Only,X-Content-Security-Policy,x-azure-ref,X-Cache,Strict-Transport-Security",
+        "x-content-security-policy": "default-src 'self'; style-src 'self' https://fonts.googleapis.com/css https://microsoft.github.io/PowerBI-JavaScript/demo/node_modules/powerbi-client/dist/powerbi.css 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com/gtag/js https://az416426.vo.msecnd.net/scripts/a/ai.0.js https://www.google-analytics.com/analytics.js https://www.google-analytics.com/j https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js https://d2yyd1h5u9mauk.cloudfront.net/integrations/web/v1/library/ohX53ID38Gc8eUWa/delighted.js; img-src 'self' data: https://www.google-analytics.com/ https://www.googletagmanager.com https://shield.sitelock.com/shield/secure.callcabinet.com https://atmossystemsstaging.callcabinet.com/Content/Images/MailTemplates/Atmos-Mailer-Header-Logo.png https://atmos.callcabinet.com/Content/Images/MailTemplates/Atmos-Mailer-Header-Logo.png; font-src 'self' data: https://fonts.gstatic.com/; frame-src 'self' https://vars.hotjar.com/ https://app.powerbi.com/reportEmbed; connect-src 'self' https://api.callcabinet.com/ https://secure.callcabinet.com/ https://atmossystemsstaging.callcabinet.com/ https://in.hotjar.com/api/v1/client/sites/831725/visit-data https://vc.hotjar.io/views/ https://dc.services.visualstudio.com/ https://www.google-analytics.com wss://ws.pusherapp.com/ https://eventgw.twilio.com/ https://media.twiliocdn.com wss://chunderw-vpc-gll.twilio.com https://web.delighted.com; media-src data: 'self' *; frame-ancestors 'self';object-src 'none';",
+        "content-security-policy-report-only": "default-src 'self'; style-src 'self' 'report-sample' https://fonts.googleapis.com/css https://microsoft.github.io/PowerBI-JavaScript/demo/node_modules/powerbi-client/dist/powerbi.css 'unsafe-inline'; script-src 'self' 'report-sample' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com/gtag/js https://az416426.vo.msecnd.net/scripts/a/ai.0.js https://www.google-analytics.com/analytics.js https://www.google-analytics.com/j https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js https://d2yyd1h5u9mauk.cloudfront.net/integrations/web/v1/library/ohX53ID38Gc8eUWa/delighted.js; img-src 'self' data: https://www.google-analytics.com/ https://www.googletagmanager.com https://shield.sitelock.com/shield/secure.callcabinet.com https://atmossystemsstaging.callcabinet.com/Content/Images/MailTemplates/Atmos-Mailer-Header-Logo.png https://atmos.callcabinet.com/Content/Images/MailTemplates/Atmos-Mailer-Header-Logo.png; font-src 'self' data: https://fonts.gstatic.com/; frame-src 'self' https://vars.hotjar.com/ https://app.powerbi.com/reportEmbed; connect-src 'self' https://api.callcabinet.com/ https://secure.callcabinet.com/ https://atmossystemsstaging.callcabinet.com/ https://in.hotjar.com/api/v1/client/sites/831725/visit-data https://vc.hotjar.io/views/ https://dc.services.visualstudio.com/ https://www.google-analytics.com wss://ws.pusherapp.com/ https://eventgw.twilio.com/ https://media.twiliocdn.com wss://chunderw-vpc-gll.twilio.com https://web.delighted.com; media-src data: 'self' *; frame-ancestors 'self'; block-all-mixed-content; object-src 'self'; child-src 'none'; manifest-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'none'; report-to https://gate.rapidsec.net/g/r/csp/90f569a9-499b-483a-b901-8f1b4cac16f3/0/0/3?sct=d7f06a08-06b1-4520-bfc7-012a78221f6d&dpos=report",
+        "access-control-allow-origin": "*",
+        "x-cache": "CONFIG_NOCACHE",
+        "date": "Sat, 29 Aug 2026 10:12:48 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "x-azure-ref": "20260829T101246Z-1799784c76b6jbqhhC1WAW4fgs0000000fag00000000356t"
+      },
+      "responseBody": "",
+      "latencyMs": 3022,
+      "fired": true,
+      "failure": null
+    },
+    {
+      "seq": 282,
+      "startedAt": "2026-08-29T10:12:53.713Z",
+      "method": "OPTIONS",
+      "url": "https://developer1.callcabinet.com/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "pathname": "/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "query": {},
+      "requestHeaders": {
+        "accept": "*/*",
+        "access-control-request-headers": "cache-control,content-type,cra-api-key,x-ms-client-request-id",
+        "access-control-request-method": "POST",
+        "origin": "https://developer1-portal.callcabinet.com",
+        "sec-fetch-mode": "cors",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.7778.96 Safari/537.36"
+      },
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "accept-ranges": "bytes",
+        "access-control-allow-headers": "cache-control,content-type,cra-api-key,x-ms-client-request-id",
+        "access-control-allow-methods": "POST",
+        "access-control-allow-origin": "*",
+        "content-length": "0",
+        "date": "Sat, 29 Aug 2026 10:12:54 GMT",
+        "strict-transport-security": "max-age=15552000; includeSubDomains; preloadmax-age=15552000; includeSubDomains; preload",
+        "x-azure-ref": "20260829T101254Z-1799784c76b6jbqhhC1WAW4fgs0000000fag00000000360z",
+        "x-cache": "CONFIG_NOCACHE"
+      },
+      "responseBody": "<unreadable>",
+      "latencyMs": 116,
+      "fired": true,
+      "failure": null
+    },
+    {
+      "seq": 286,
+      "startedAt": "2026-08-29T10:12:53.717Z",
+      "method": "POST",
+      "url": "https://developer1.callcabinet.com/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "pathname": "/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "query": {},
+      "requestHeaders": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "cra-api-key": "<redacted len=32>",
+        "cache-control": "no-cache",
+        "referer": "https://developer1-portal.callcabinet.com/",
+        "accept-language": "en-US",
+        "sec-ch-ua": "\"Chromium\";v=\"148\", \"HeadlessChrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "x-ms-client-request-id": "9eed2220-8022-3980-772b-6884bbab0db3",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.7778.96 Safari/537.36",
+        "content-type": "application/json"
+      },
+      "requestBody": "{\"callId\":\"d71ac345-86a0-f111-9b33-6045bded66d5\",\"entityTypeId\":1,\"startMilliseconds\":47961,\"endMilliseconds\":50961,\"requestText\":\"AQA evidence control\"}",
+      "status": null,
+      "responseHeaders": null,
+      "responseBody": null,
+      "latencyMs": 29990,
+      "fired": true,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "seq": 433,
+      "startedAt": "2026-08-29T10:13:28.691Z",
+      "method": "OPTIONS",
+      "url": "https://developer1.callcabinet.com/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "pathname": "/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "query": {},
+      "requestHeaders": {
+        "accept": "*/*",
+        "access-control-request-headers": "cache-control,content-type,cra-api-key,x-ms-client-request-id",
+        "access-control-request-method": "POST",
+        "origin": "https://developer1-portal.callcabinet.com",
+        "sec-fetch-mode": "cors",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.7778.96 Safari/537.36"
+      },
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "accept-ranges": "bytes",
+        "access-control-allow-headers": "cache-control,content-type,cra-api-key,x-ms-client-request-id",
+        "access-control-allow-methods": "POST",
+        "access-control-allow-origin": "*",
+        "content-length": "0",
+        "date": "Sat, 29 Aug 2026 10:13:30 GMT",
+        "strict-transport-security": "max-age=15552000; includeSubDomains; preloadmax-age=15552000; includeSubDomains; preload",
+        "x-azure-ref": "20260829T101329Z-1799784c76b6jbqhhC1WAW4fgs0000000fag0000000039wc",
+        "x-cache": "CONFIG_NOCACHE"
+      },
+      "responseBody": "<unreadable>",
+      "latencyMs": 433,
+      "fired": true,
+      "failure": null
+    },
+    {
+      "seq": 435,
+      "startedAt": "2026-08-29T10:13:28.692Z",
+      "method": "POST",
+      "url": "https://developer1.callcabinet.com/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "pathname": "/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "query": {},
+      "requestHeaders": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "cra-api-key": "<redacted len=32>",
+        "cache-control": "no-cache",
+        "referer": "https://developer1-portal.callcabinet.com/",
+        "accept-language": "en-US",
+        "sec-ch-ua": "\"Chromium\";v=\"148\", \"HeadlessChrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "x-ms-client-request-id": "1bb823dc-b361-9b05-1bcf-bc5eed26406a",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.7778.96 Safari/537.36",
+        "content-type": "application/json"
+      },
+      "requestBody": "{\"callId\":\"d71ac345-86a0-f111-9b33-6045bded66d5\",\"entityTypeId\":1,\"endMilliseconds\":67961,\"requestText\":\"AQA evidence omit-start\"}",
+      "status": null,
+      "responseHeaders": null,
+      "responseBody": null,
+      "latencyMs": 29973,
+      "fired": true,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "seq": 570,
+      "startedAt": "2026-08-29T10:14:04.299Z",
+      "method": "OPTIONS",
+      "url": "https://developer1.callcabinet.com/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "pathname": "/api/calls/post-redaction/d71ac345-86a0-f111-9b33-6045bded66d5",
+      "query": {},
+      "requestHeaders": {
+        "accept": "*/*",
+        "access-control-request-headers": "cache-control,content-type,cra-api-key,x-ms-client-request-id",
+        "access-control-request-method": "POST",
+        "origin": "https://developer1-portal.callcabinet.com",
+        "sec-fetch-mode": "cors",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.7778.96 Safari/537.36"
+      },
+      "requestBody": null,
+      "status": 200,
+      "responseHeaders": {
+        "accept-ranges": "bytes",
+        "access-control-allow-headers": "cache-control,content-type,cra-api-key,x-ms-client-request-id",
+        "access-control-allow-methods": "POST",
+        "access-control-allow-origin": "*",
+        "content-length": "0",
+        "date": "Sat, 29 Aug 2026 10:14:05 GMT",
+        "strict-transport-security": "max-age=15552000; includeSubDomains; preloadmax-age=15552000; includeSubDomains; preload",
+        "x-azure-ref": "20260829T101405Z-1799784c76b6jbqhhC1WAW4fgs0000000fag000000003ee1",
+        "x-cache": "CONFIG_NOCACHE"
+      },
+      "responseBody": "<unreadable>",
+      "latencyMs": 474,
+      "fired": true,
+      "failure": null
+    }
+  ],
+  "callsDropped": 563
+}
