@@ -7,8 +7,9 @@
 > **Status this session**: the dedicated before/after-switch capture in
 > `evidence-security.spec.ts` (steps 2 + 5) **could not run** — after login
 > the account `romana@callcabinet.com` lands on the "Select your default
-> company" screen with **CC Test 1 absent** (the account lost CC Test 1
-> access; the login helper also misclassifies that screen — see
+> company" screen with **CC Test 1 absent** (the account no longer had
+> selectable access to CC Test 1; time and cause unknown; the login helper
+> also misclassifies that screen — see
 > `06-environment/ENV-site-assignment-audit.md`). The
 > finding below carries the results from **prior sessions** (2026-08-29
 > ninth session, recorded in `docs/bug-reports/dev-portal-happy-path-coverage-2026-08-28.md`'s

@@ -24,9 +24,12 @@ git:              feature/chat-listing @ ed251c2
 
 Every batch's `precondition` (in each `raw/*.json`) records `company = CC Test 1`
 + that site. **No 401/403/"not allowed for current subscription" appears in
-any captured response** — the account had valid CC Test 1 + key access
-throughout the captures. (It was removed from CC Test 1 **after** 10:24, before
-the console/security specs could run — see §22.)
+any captured response** — all captured API requests were successfully authorized
+with the CC Test 1 subscription key and operated on CC Test 1 resources
+throughout the captures. (Loss of access to CC Test 1 was detected after the
+last confirmed successful evidence batch (~10:24 UTC) and before the subsequent
+console/security runs. The exact time and cause of the access change are
+unknown — see §22.)
 
 > **Raw-capture note**: `ApiOperationPage.send()` fires "Send" via a
 > forced-click-then-raw-DOM fallback; when the forced click exceeds its 5 s
@@ -502,11 +505,10 @@ all failed in `stagingLogin` → `LoginPage.completeLogin` → `AlreadyLoggedInM
 → `logOutOtherSessionButton.click()` (300 s timeout). **The page snapshot at
 failure shows the "Select your default company" screen** with options
 `1Test_Dev_UA_Svitlana_Company_3`, `Charl_Test`, `Roman_QA_TEST` — **CC Test 1
-is NOT in the list.** The account `romana@callcabinet.com` **has been removed
-from CC Test 1** (very likely a spam mitigation from the volume of Manual
-Redaction + create/delete calls across the day). Every dev-portal test needs
-CC Test 1 + its `Primary: API_test` key → **all blocked** until access is
-restored.
+is NOT in the list.** The Select Company screen no longer listed CC Test 1.
+This proves the account no longer had selectable access to CC Test 1 at that
+point; the cause is unknown. Every dev-portal test needs CC Test 1 + its
+`Primary: API_test` key → **all blocked** until access is restored.
 
 ### The finding (2026-08-27 controlled run — full chain in the report)
 ```

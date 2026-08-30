@@ -8,7 +8,8 @@ git `feature/chat-listing @ ed251c2`.
 > **Evidence note**: the dedicated `evidence-console.spec.ts` run on 2026-08-29
 > could not complete — after login the shared account `romana@callcabinet.com`
 > landed on the "Select your default company" screen with **CC Test 1 absent**
-> (the account lost CC Test 1 access); the login helper additionally
+> (the account no longer had selectable access to CC Test 1; time and cause
+> unknown); the login helper additionally
 > misclassifies that screen as the "already logged in" modal and hangs in
 > `AlreadyLoggedInModal.logOutOtherSession()` (see
 > `06-environment/ENV-site-assignment-audit.md` and §6 below). The findings
@@ -100,4 +101,4 @@ Path-param field missing · wrong/stale sibling schema shown · no body editor �
 
 ## 6. Blocker that interrupted this section
 
-The `evidence-console.spec.ts` and `evidence-security.spec.ts` runs on 2026-08-29 (afternoon) all failed in `stagingLogin` → `LoginPage.completeLogin`. **Root cause**: login succeeds, then the account `romana@callcabinet.com` is shown the "Select your default company" screen and **CC Test 1 is not offered** — the account has lost CC Test 1 access (likely a spam mitigation from the day's write volume). The login helper compounds this by misreading the company-picker as the "already logged in on another computer" modal and hanging in `AlreadyLoggedInModal.logOutOtherSession()` with no timeout. Earlier runs the same day (batches 1–4, role-management, notifications, all `*-api` groups) succeeded under CC Test 1; the access loss happened ~10:24 UTC, after batch 4. **Action needed**: restore `romana@callcabinet.com`'s CC Test 1 access (owner/admin), fix the login helper (timeout + company-picker handling), then re-run `evidence-console.spec.ts` and `evidence-security.spec.ts`.
+The `evidence-console.spec.ts` and `evidence-security.spec.ts` runs on 2026-08-29 (afternoon) all failed in `stagingLogin` → `LoginPage.completeLogin`. **Root cause**: login succeeds, then the account `romana@callcabinet.com` is shown the "Select your default company" screen and **CC Test 1 is not offered** — the Select Company screen no longer listed CC Test 1, so the account no longer had selectable access to it at that point; the cause is unknown. The login helper compounds this by misreading the company-picker as the "already logged in on another computer" modal and hanging in `AlreadyLoggedInModal.logOutOtherSession()` with no timeout. Earlier runs the same day (batches 1–4, role-management, notifications, all `*-api` groups) succeeded under CC Test 1; loss of access was detected after batch 4 (~10:24 UTC), exact time unknown. **Action needed**: restore `romana@callcabinet.com`'s CC Test 1 access (owner/admin), fix the login helper (timeout + company-picker handling), then re-run `evidence-console.spec.ts` and `evidence-security.spec.ts`.

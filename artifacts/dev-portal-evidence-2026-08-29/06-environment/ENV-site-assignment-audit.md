@@ -4,7 +4,7 @@
 - **Classification**: INFRASTRUCTURE / ENVIRONMENT
 - **Severity**: P1 — a stale key-site assignment (or a stuck account session) silently invalidates whole batches of tests
 
-## 1. The blocker that interrupted this investigation — the account lost CC Test 1 access
+## 1. The blocker that interrupted this investigation — loss of access to CC Test 1
 
 **Symptom** (2026-08-29 afternoon): `evidence-console.spec.ts` and
 `evidence-security.spec.ts` runs all failed in `stagingLogin` →
@@ -14,12 +14,17 @@
 credentials are accepted. The account `romana@callcabinet.com` then lands on
 the **"Select your default company"** screen, which offers only
 `1Test_Dev_UA_Svitlana_Company_3`, `Charl_Test`, `Roman_QA_TEST` —
-**CC Test 1 is not in the list**. The account has been **removed from / lost
-its access to CC Test 1** (most likely a spam mitigation triggered by the
-volume of write calls — Manual Redaction and create/delete — across the day).
-Every dev-portal test needs CC Test 1 and its `Primary: API_test`
-subscription key, so **all dev-portal specs are blocked** until that access is
-restored by a CC Test 1 owner/admin.
+**CC Test 1 is not in the list**. The Select Company screen no longer listed
+CC Test 1. This proves the account no longer had selectable access to CC Test 1
+at that point; the cause is unknown. Every dev-portal test needs CC Test 1 and
+its `Primary: API_test` subscription key, so **all dev-portal specs are
+blocked** until that access is restored by a CC Test 1 owner/admin.
+
+**Unverified hypothesis (not evidence)**: the access change may have been an
+automated anti-abuse / spam mitigation triggered by the day's write volume
+(Manual Redaction + create/delete calls). This was **not** confirmed — no
+notification, log entry, or admin statement was seen. Recorded only so the
+owner/admin knows where to look; do not cite it as a cause.
 
 **Secondary (separate) harness bug**: `completeLogin` →
 `clearActiveSessionModal` → `AlreadyLoggedInModal.logOutOtherSession()` →
@@ -27,7 +32,7 @@ restored by a CC Test 1 owner/admin.
 company" screen — it treats it as (or gets stuck ahead of) the "already
 logged in on another computer" modal and the click hangs with no timeout,
 consuming the full test timeout. This is a login-helper defect independent of
-the access loss and would need fixing even once CC Test 1 access is back
+the access change and would need fixing even once CC Test 1 access is back
 (add a timeout to `logOutOtherSession()`; teach `completeLogin` to detect and
 handle the company-picker screen).
 
@@ -36,10 +41,11 @@ batch3 create-agent-group + create-extension + negative-500s + manual-redaction,
 batch4 list-calls + list-extensions + list-retention + update-agent-group +
 update-tag + delete-user) — all ran successfully earlier the same day, under
 CC Test 1, key on `UA team recording` / `8cc22cd2-…` (every `raw/*.json`
-`precondition` confirms it). The access loss happened **after** batch 4
-(~10:24 UTC); no captured evidence is affected — zero 401/403/"not allowed for
-current subscription" appears in any response, and every write completed
-end-to-end.
+`precondition` confirms it). Loss of access was **detected after** batch 4
+(~10:24 UTC); the exact time and cause are unknown. No captured evidence is
+affected — zero 401/403/"not allowed for current subscription" appears in any
+response, every captured request was authorized against CC Test 1, and every
+write completed end-to-end.
 
 **Impact**: the last three findings could not be captured live —
 - `03-console-ui/CONSOLE-RACE-REPORT.md` §2/§3 (direct-backend contrast for Get Alert Trigger Operators; live Content-Type capture) — **evidence gap**;

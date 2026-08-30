@@ -10,8 +10,9 @@
 > controlled chain — bind a restricted user to site A, switch the key to
 > site B, re-read **and re-write** the same id) **could not run** — after
 > login the account `romana@callcabinet.com` lands on the "Select your
-> default company" screen and **CC Test 1 is not listed** (the account lost
-> CC Test 1 access); `AlreadyLoggedInModal` also misclassifies that screen
+> default company" screen and **CC Test 1 is not listed** (the account no
+> longer had selectable access to CC Test 1; time and cause unknown);
+> `AlreadyLoggedInModal` also misclassifies that screen
 > (see `06-environment/ENV-site-assignment-audit.md`). The spec is written
 > and typechecks; re-run it once CC Test 1 access is restored.
 >
@@ -106,7 +107,7 @@ should be:
 
 - 2026-08-27 controlled run: 1/1 (create-then-verify, the strongest form).
 - 2026-08-27 cross-site comparison on pre-existing data: the same 90–100 records, same order, for two different site assignments of the same key — reproduced across the whole result set.
-- 2026-08-29: **0/1 — the re-run was blocked** (account lost CC Test 1 access; see `06-environment/ENV-site-assignment-audit.md`).
+- 2026-08-29: **0/1 — the re-run was blocked** (loss of access to CC Test 1, detected after ~10:24 UTC; time and cause unknown — see `06-environment/ENV-site-assignment-audit.md`).
 - Cross-site **`Update Restricted User Access`**: **0 runs, ever** — UNVERIFIED.
 
 ## Alternative explanations ruled out
