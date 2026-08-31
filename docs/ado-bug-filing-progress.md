@@ -1,7 +1,7 @@
 # ADO bug filing — progress (Developer Portal / API Management)
 
 Status of filing the reconciliation results into Azure DevOps (org `callcabinetusa`, project **Atmos Systems**).
-Paused 2026-08-30. **Do not re-run the create step for anything marked DONE below — the tickets already exist.**
+**COMPLETE 2026-08-31** — 10 Bugs created, 12 comments posted, all verified against the live board. **Do not re-run the create or comment steps — the tickets and comments already exist.**
 
 Scope decided with the user:
 - One Bug per problem class (groups **A, B, C, D, F, G, H**) + separate Bugs for **BUG 03**, **BUG 16**, and **BUG 20 second failure mode**. 10 Bugs total.
@@ -53,11 +53,9 @@ Tags as ADO stored them (ADO normalised "IP Whitelist" → "IP WHITELIST" agains
 - #38188 — `API Management; Development; Manual Redaction`
 - #38189 — `API Management; Development; User Management`
 
-### Verification of Related links on #38164 / #38165 (user asked to double-check)
+### Verification of Related links — DONE 2026-08-31
 
-The independent verification GET was interrupted twice and **not completed**. However, the `POST .../workitems/$Bug` **create response** for every one of the 10 bugs echoed back its `relations`, and the filing helper printed them — for #38164: `Related -> 37998`, `Related -> 37981`; for #38165: `Related -> 37981`, `Related -> 37998`; for #38170: `Related -> 37981`, `Related -> 37998`, `Related -> 36027`. So the links **were set at creation time** (authoritative — ADO returns the persisted work item).
-
-**Task for tomorrow (optional, low priority — do NOT edit, just read):** one `POST _apis/wit/workitemsbatch` with `{"ids":[38164,38165,38170,38171,38172,38179,38180,38181,38188,38189],"$expand":"relations"}` (note: `$expand` cannot be combined with `fields`) to belt-and-braces confirm relations + tags + priority on all 10. If any Related link is missing, add it with a `PATCH` `{"op":"add","path":"/relations/-","value":{"rel":"System.LinkTypes.Related","url":"https://dev.azure.com/callcabinetusa/_apis/wit/workItems/<n>"}}` — but the create responses indicate this will not be needed.
+Read back from the live board via `POST _apis/wit/workitemsbatch` (`$expand:relations`). **All 10 bugs carry `Related → #37981` and `Related → #37998`; #38170 (C) additionally carries `Related → #36027`.** No missing links, no fixes needed. Also confirmed on the board: Priority/Severity per the agreed table, Area/Iteration, empty assignee, ReproSteps not truncated, no Cyrillic.
 
 ### Remaining from the 10 bugs
 
@@ -65,14 +63,28 @@ The independent verification GET was interrupted twice and **not completed**. Ho
 
 ---
 
-## 2. Comments on existing tickets — 0 of 12 ADDED ❌
+## 2. Comments on existing tickets — 12 of 12 ADDED ✅ (2026-08-31)
 
-**Nothing has been commented yet.** All 12 remain to be posted, via
-`POST _apis/wit/workItems/{id}/comments?api-version=7.1-preview.4` with body `{"text": "<html>"}` (comment only — **never** PATCH the existing work items).
+All 12 posted via `POST _apis/wit/workItems/{id}/comments?api-version=7.1-preview.4` (comment only — no field PATCH). Each ticket's current content was read first to avoid duplicating what was already written; comments were trimmed to genuinely-additive material (verbatim captures, extra repro variants, ruled-out hypotheses, claim boundaries). All English.
 
-Each comment opens with the standard evidence-provenance line, then adds information **not in the ticket's original description**: verbatim raw request/response captures, additional repro variants, ruled-out hypotheses, and claim boundaries. Draft text for each is below — regenerate/refine from `artifacts/dev-portal-evidence-2026-08-29/raw/*.json` and post in order.
+| # | Target | Comment id | Notes |
+|---|---|---|---|
+| 1 | #38091 | 12725483 | 6/6 body-variant matrix; which variants name SiteId vs fail earlier; take:10000 console default; ruled-out |
+| 2 | #38119 | 12725503 | full 6-row operator matrix (Name/SiteName × eq/contains/equals) + verbatim failing body; `contains` also works |
+| 3 | #38122 | 12725507 | verbatim unfiltered 200 row; all 4 casings (ticket names 2); other-site id; zero-customerId side note (→#38164) |
+| 4 | #38088 | 12725510 | no dedicated raw (honest); #38116 relationship + "one broken default body" class; retest coverage |
+| 5 | #38116 | 12725511 | console default body combines this siteName sort + #38088's customerId filter → must be verified together |
+| 6 | #38095 | 12725514 | manual `Content-Type` workaround; independent corroboration (automation needed a re-open-with-retry) |
+| 7 | #38113 | 12725517 | **boundaries**: List/Get confirmed 2026-08-27 controlled run; cross-site Update NEVER executed; cross-customer NOT tested |
+| 8 | #38125 | 12725519 | verbatim empty-agentJson req/resp; List queried after 200, still absent; 200 body carries no error/warning/flag |
+| 9 | #38128 | 12725521 | verbatim valid create; real id 1016 this run vs 1004 in ticket; GET by real id works; only `id` field wrong |
+| 10 | #38134 | 12725523 | same catch-all page as intentional unauth message (#36244) but on authed Profile → route unwired; no gateway request |
+| 11 | #37624 | 12725527 | **our 2nd failure mode**: staging console Send fires no OPTIONS/POST, 3/3, vs their prod 500; links new bug **#38189** |
+| 12 | #38081 | 12725528 | later run returned **200** with valid data (verbatim); functional 500 not reproduced; suggest re-scope to route inconsistency (P2) |
 
-Standard opening line for every comment:
+### Original draft table (for reference)
+
+Standard opening line used on each comment (adapted per ticket where the confirming run was not 2026-08-29 — e.g. #38113 uses the 2026-08-27 controlled run, #38134 is UI-only):
 
 > *Additional detail from the AQA evidence run (staging, company CC Test 1, key "Primary: API_test" scoped to site "UA team recording" / 8cc22cd2-a4b7-46c5-b907-9050e110dac5, build feature/chat-listing @ ed251c2, captured 2026-08-29 via the real Try-it console + a network listener; subscription-key header redacted at capture time. No screenshots/traces — those runs were blocked).*
 
@@ -93,12 +105,12 @@ Standard opening line for every comment:
 
 ---
 
-## 3. Exact resume point
+## 3. Status — COMPLETE
 
-1. **Bugs:** all 10 done — nothing to do.
-2. **(Optional)** one read-only `workitemsbatch` (`$expand:relations`) over the 10 ids to confirm relations/tags/priority. Create responses already showed them correct.
-3. **Comments:** start at comment **#1 (target #38091)** and work down the table above through **#12 (target #38081)**. Post one at a time, sequentially, with pauses — no parallel request series. Comment only; do not PATCH any existing work item.
-4. After all 12 comments: update this file's comment table to DONE and note each comment id.
+1. **Bugs:** 10 / 10 created. Verified against the live board 2026-08-31 (WIQL for `Bug` id 38160–38205 → exactly the 10 expected IDs, no extras, no duplicates; then one batch for fields + relations). Every bug: correct type/state, Priority/Severity per the agreed table, Area `Atmos Systems` / Iteration 20, assignee empty, `Related → #37981 + #37998` present on the board (C also `→ #36027`), ReproSteps 3.8k–7.2k chars with `<pre>` + Affected-operations table intact, no Cyrillic (only ADO-normalised typographic punctuation from HTML entities). **Note:** an ADO process rule auto-spawned 2 child Tasks per bug (Dev/QA pair, IDs #38166–#38193, created by *Rostyslav Khomitskyu*) — not duplicates, not our doing.
+2. **Comments:** 12 / 12 posted (2026-08-31) — see the table in section 2 for comment IDs.
+
+Nothing outstanding for this filing task.
 
 ### Request discipline (still applies)
 
