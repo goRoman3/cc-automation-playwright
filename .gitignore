@@ -23,6 +23,7 @@ specs/
 # generated catalogue render) — force-track them (last match wins).
 !tests/dev-portal/UNVERIFIED.md
 !tests/dev-portal/cross-tenant-catalog.md
+!docs/ado-bug-filing-progress.md
 
 # ── Auth state ────────────────────────────────────────────────────────────────
 .auth/
