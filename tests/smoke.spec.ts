@@ -1,8 +1,9 @@
 import { test, expect } from '../fixtures/fixtures';
+import { resilientGoto } from '../helpers/navigate';
 
 test.describe('Smoke — application reachability', () => {
   test('login page loads and has correct title', async ({ page }) => {
-    await page.goto('/');
+    await resilientGoto(page, '/');
     await expect(page).toHaveTitle('Smarsh Login');
   });
 
@@ -17,7 +18,7 @@ test.describe('Smoke — application reachability', () => {
     // This is an SPA: /Home is served but the app renders the login gate
     // rather than a server-side redirect. We assert the login inputs are
     // present, which is the meaningful auth-guard check here.
-    await page.goto('/Home');
+    await resilientGoto(page, '/Home');
     await expect(loginPage.emailInput).toBeVisible({ timeout: 10_000 });
     await expect(loginPage.loginButton).toBeVisible();
   });

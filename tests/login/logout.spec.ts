@@ -12,8 +12,10 @@ const VALID_EMAIL = process.env.TEST_EMAIL;
 const VALID_PASSWORD = process.env.TEST_PASSWORD;
 
 test.describe('6844 Browser Back after logout', () => {
-  // login() may force past the slow active-session modal — allow headroom.
-  test.describe.configure({ mode: 'serial', timeout: 90_000 });
+  // login() may force past the slow active-session modal, and post-logout
+  // render latency can itself spike under the shared account's accumulated
+  // activity across a full cross-browser run — allow headroom for both.
+  test.describe.configure({ mode: 'serial', timeout: 120_000 });
   test.skip(
     !VALID_EMAIL || !VALID_PASSWORD,
     'Set TEST_EMAIL and TEST_PASSWORD in .env to run authenticated tests',
@@ -34,20 +36,37 @@ test.describe('6844 Browser Back after logout', () => {
   });
 
   test('Back button after logout stays on the login page', async ({ page, loginPage, homePage }) => {
-    await loginPage.goto();
-    await loginPage.login(VALID_EMAIL!, VALID_PASSWORD!);
-    await page.waitForURL('/Home', { timeout: 20_000 });
-    await expect(homePage.header).toBeVisible();
+    // Arrange: must land on an authenticated /Home before the logout/back-button
+    // steps mean anything. login() can loop through several stale-session modals
+    // if the shared account has leftover sessions from earlier tests in the same
+    // cross-browser run — kept as its own step (with its own timeout) so a slow
+    // or failed login is reported as "Log in", not misattributed to the logout
+    // assertions further down.
+    await test.step('Log in', async () => {
+      await loginPage.goto();
+      await loginPage.login(VALID_EMAIL!, VALID_PASSWORD!);
+      await page.waitForURL('/Home', { timeout: 20_000 });
+      await expect(homePage.header).toBeVisible();
+    }, { timeout: 90_000 });
 
-    // Log out via the user-info fly-out.
-    await homePage.logout();
-    await expect(loginPage.emailInput).toBeVisible({ timeout: 15_000 });
+    await test.step('Log out via the user-info fly-out', async () => {
+      await homePage.logout();
+      // Post-logout render latency can spike under the shared account's
+      // accumulated activity across a full cross-browser run — same class of
+      // occasional slow response documented in login.spec.ts's rate-limit note.
+      await expect(loginPage.emailInput).toBeVisible({ timeout: 25_000 });
+    }, { timeout: 30_000 });
 
-    // Back button must not restore the authenticated session. Use 'commit' —
-    // after logout the cached /Home no longer fully loads (no session), so the
-    // default 'load' wait would hang; we only need the navigation to land.
-    await page.goBack({ waitUntil: 'commit' });
-    await expect(loginPage.emailInput).toBeVisible({ timeout: 15_000 });
-    await expect(homePage.header).toBeHidden();
+    await test.step('Back button must not restore the authenticated session', async () => {
+      // Case 6844: "User stays on the Login page when clicking Back after
+      // successful logout" — we were already on the login page after the
+      // previous step, so Back is expected to change nothing. Use 'commit' —
+      // after logout the cached /Home no longer fully loads (no session), so
+      // the default 'load' wait would hang; we only need the navigation to
+      // land, since nothing past that point should actually happen.
+      await page.goBack({ waitUntil: 'commit' });
+      await expect(loginPage.emailInput).toBeVisible({ timeout: 25_000 });
+      await expect(homePage.header).toBeHidden();
+    }, { timeout: 30_000 });
   });
 });

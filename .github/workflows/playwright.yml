@@ -18,6 +18,10 @@ jobs:
     name: Smoke & Login Tests
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     env:
       BASE_URL: ${{ secrets.BASE_URL }}
       TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
@@ -38,6 +42,14 @@ jobs:
 
       - name: Run smoke & login tests
         run: npm run test:ci
+
+      - name: Publish test results as PR annotations
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}
+        with:
+          name: Smoke & Login Test Results
+          path: test-results/junit.xml
+          reporter: java-junit
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -61,6 +73,10 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_email_tests }}
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     env:
       BASE_URL: ${{ secrets.BASE_URL }}
       TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
@@ -89,6 +105,14 @@ jobs:
 
       - name: Run email integration tests (headed via Xvfb)
         run: xvfb-run --auto-servernum npm run test:reset
+
+      - name: Publish test results as PR annotations
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}
+        with:
+          name: Email Integration Test Results
+          path: test-results/junit.xml
+          reporter: java-junit
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

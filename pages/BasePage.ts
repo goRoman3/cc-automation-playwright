@@ -1,4 +1,5 @@
 import { type Page } from '@playwright/test';
+import { resilientGoto } from '../helpers/navigate';
 
 /**
  * Shared base for all Page Objects.
@@ -12,7 +13,7 @@ export abstract class BasePage {
 
   /** Navigates to a path relative to `baseURL` (defaults to the app root). */
   async goto(path = '/'): Promise<void> {
-    await this.page.goto(path);
+    await resilientGoto(this.page, path);
   }
 
   /** Current page URL. */

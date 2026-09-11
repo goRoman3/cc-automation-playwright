@@ -1,3 +1,8 @@
+# ── WIP: STT for new extensions (draft — exclude from commits for now) ────────
+pages/extension-management/
+pages/admin-report/
+tests/extension-management/
+
 # ── Dependencies ──────────────────────────────────────────────────────────────
 node_modules/
 package-lock.json
@@ -14,6 +19,24 @@ dist/
 *.md
 agents/
 specs/
+# …but the dev-portal matrix docs ARE deliverables (tracked-status ledger +
+# generated catalogue render) — force-track them (last match wins).
+!tests/dev-portal/UNVERIFIED.md
+!tests/dev-portal/cross-tenant-catalog.md
+# …and the repo's own onboarding docs must ship with it (found 2026-09-04:
+# both were silently caught by the blanket *.md rule above and had never
+# actually been committed — a clone got no README at all).
+!/README.md
+!/MIGRATION.md
+
+# ── Local-only docs/evidence (2026-09-03) ──────────────────────────────────────
+# Everything that isn't test code/helpers/fixtures/config — investigation
+# write-ups, filed-bug progress notes, raw network-capture evidence bundles,
+# stray root notes — lives here so the repo stays clean for handoff to other
+# QA. Safe to delete this whole folder at any time; nothing under `tests/`,
+# `pages/`, `fixtures/`, `helpers/` reads from it, and any spec that WRITES
+# evidence here (matrix specs, `_evidence.ts`) recreates it on its own.
+local-only/
 
 # ── Auth state ────────────────────────────────────────────────────────────────
 .auth/
@@ -34,6 +57,10 @@ CLAUDE.local.md
 /playwright/.cache/
 .playwright-mcp/
 *.log
+
+# ── Tenant-isolation phase1/phase2 baseline (local-only, session-specific) ───
+.tenant-isolation-baseline.json
+.tenant-isolation-negative-writes-baseline.json
 
 # ── AI analysis outputs ───────────────────────────────────────────────────────
 .ai-reports/
@@ -60,3 +87,4 @@ Thumbs.db
 # ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
+

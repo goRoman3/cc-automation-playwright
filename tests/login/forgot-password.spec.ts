@@ -16,7 +16,7 @@ test.describe('Forgot password overlay', () => {
     await expect(forgotPasswordPage.container).toBeVisible();
   });
 
-  test('6848 required elements are present on the Reset Password screen', async ({ page, loginPage, forgotPasswordPage }) => {
+  test('6848 required elements are present on the Reset Password screen @elements', async ({ page, loginPage, forgotPasswordPage }) => {
     // Core overlay controls
     await expect(forgotPasswordPage.emailInput).toBeVisible();
     await expect(forgotPasswordPage.submitButton).toBeVisible();
