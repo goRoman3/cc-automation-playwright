@@ -20,7 +20,7 @@ test.describe('Developer Portal (staging) — batch 4 evidence', () => {
   async function precondition(portal: DeveloperPortalPage): Promise<Precondition> {
     let siteId: string | null = null; let siteName: string | null = null;
     try {
-      const o = await openConsole(portal, 'Reports', /^Get Sites Storage Usage/, { retries: 3 });
+      const o = await openConsole(portal, 'Reports', /^List Sites Storage Usage/, { retries: 3 });
       await o.selectSubscriptionKey(API_KEY_OPTION);
       const { body } = await o.send();
       const f = (body as Array<{ siteId?: string; id?: string; siteName?: string; name?: string }>)[0];
@@ -61,7 +61,7 @@ test.describe('Developer Portal (staging) — batch 4 evidence', () => {
     const pc = await precondition(portal);
 
     // A known-working Calls endpoint for contrast.
-    const info = await fire(portal, ev, 'Calls', /^Get Call Info/, undefined, [['callId', KNOWN.callId]]);
+    const info = await fire(portal, ev, 'Calls', /^Preview Call Info/, undefined, [['callId', KNOWN.callId]]);
     // List Calls itself.
     const list = await fire(portal, ev, 'Calls', /^List Calls/, LIST_BODY);
 
@@ -111,7 +111,17 @@ test.describe('Developer Portal (staging) — batch 4 evidence', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════════════
-  test('P1-LIST-EXTENSIONS-EQUALS-FILTER — "equals" operator 500s (operator-wide or field-specific?)', async ({ page, homePage }) => {
+  // SKIPPED 2026-09-03: this was a one-time investigation (filed to ADO
+  // #38119, filing complete — docs/ado-bug-filing-progress.md) probing the
+  // same "equals" operator on TWO fields (Name + SiteName) to determine
+  // field-specificity. That question is already answered (operator-wide,
+  // not field-specific) and doesn't need re-deriving on every suite run —
+  // one field is enough to regression-check the confirmed bug going
+  // forward, which now lives as a permanent, lean test in
+  // `extension-management-api.spec.ts` ("KNOWN BUG (ADO #38119)"). Kept
+  // here `skip`ped rather than deleted so the original 6-probe evidence
+  // trail (raw capture + report already on disk) stays reproducible.
+  test.skip('P1-LIST-EXTENSIONS-EQUALS-FILTER — "equals" operator 500s (operator-wide or field-specific?)', async ({ page, homePage }) => {
     const ev = new NetworkEvidence();
     ev.attach(page.context());
     const portal = await DeveloperPortalPage.openFrom(homePage);
@@ -318,7 +328,7 @@ test.describe('Developer Portal (staging) — batch 4 evidence', () => {
     const pc = await precondition(portal);
     const stamp = Date.now();
 
-    const add = await fire(portal, ev, 'Tag Management', /^Add Tag/, { name: `AQA evidence tag ${stamp}` });
+    const add = await fire(portal, ev, 'Tag Management', /^Create Tag/, { name: `AQA evidence tag ${stamp}` });
     const tagId = (add.body as { id?: string })?.id;
 
     const tries = [
@@ -334,7 +344,7 @@ test.describe('Developer Portal (staging) — batch 4 evidence', () => {
       updateResults.push({ label: t.label, name: t.name, status: r.status, body: r.body, call: r.call });
     }
     // Add Tag with the same special names (does the create path enforce it too?).
-    const addSpecial = await fire(portal, ev, 'Tag Management', /^Add Tag/, { name: `AQA add (paren) ${stamp}` });
+    const addSpecial = await fire(portal, ev, 'Tag Management', /^Create Tag/, { name: `AQA add (paren) ${stamp}` });
     // Cleanup.
     const cleanup: Record<string, number> = {};
     for (const [k, id] of Object.entries({ main: tagId, special: (addSpecial.body as { id?: string })?.id })) {
@@ -389,12 +399,12 @@ test.describe('Developer Portal (staging) — batch 4 evidence', () => {
     const email = `aqa-evidence-deluser+${Date.now()}@callcabinet.com`;
 
     // Create a disposable user so we have a real userId/userRId to target.
-    const add = await fire(portal, ev, 'User Management', /^Add User/, {
+    const add = await fire(portal, ev, 'User Management', /^Create User/, {
       userRoleIdCombined: '3', qcRId: 0, email, firstName: 'AQA', lastName: 'evidence del',
     });
     const addUser = add.body as { id?: string; userRId?: string };
     const getU = addUser.id
-      ? await fire(portal, ev, 'User Management', /^Get User/, undefined, [['userId', addUser.id]])
+      ? await fire(portal, ev, 'User Management', /^Preview User/, undefined, [['userId', addUser.id]])
       : { status: -1, body: null, call: undefined, threw: 'no user id' };
     const userRId = (getU.body as { userRId?: string })?.userRId ?? addUser.userRId;
 

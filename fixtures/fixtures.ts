@@ -6,6 +6,7 @@ import { ResetPasswordPage } from '../pages/password-reset/ResetPasswordPage';
 import { CallListingPage } from '../pages/call-listing/CallListingPage';
 import { ChatListingPage } from '../pages/chat-listing/ChatListingPage';
 import { ChatViewModal } from '../pages/chat-listing/ChatViewModal';
+import { ChatNotesPopup } from '../pages/chat-listing/ChatNotesPopup';
 import { EditColumnsPanel } from '../pages/chat-listing/EditColumnsPanel';
 import { CompanySelector } from '../pages/shared/CompanySelector';
 import { AiAgentPage } from '../pages/ai-agent/AiAgentPage';
@@ -33,6 +34,7 @@ type PageObjects = {
   callListingPage: CallListingPage;
   chatListingPage: ChatListingPage;
   chatViewModal: ChatViewModal;
+  chatNotesPopup: ChatNotesPopup;
   editColumnsPanel: EditColumnsPanel;
   companySelector: CompanySelector;
   aiAgentPage: AiAgentPage;
@@ -61,6 +63,9 @@ export const test = base.extend<PageObjects>({
   },
   chatViewModal: async ({ page }, use) => {
     await use(new ChatViewModal(page));
+  },
+  chatNotesPopup: async ({ page }, use) => {
+    await use(new ChatNotesPopup(page));
   },
   editColumnsPanel: async ({ page }, use) => {
     await use(new EditColumnsPanel(page));

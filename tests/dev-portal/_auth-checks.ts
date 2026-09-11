@@ -1,16 +1,17 @@
 import type { Page } from '@playwright/test';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import type { HomePage } from '../../pages/home/HomePage';
-import { fireConsole } from './_helpers';
+import { API_KEY_OPTION, UNSCOPED_KEY_OPTION, fireConsole } from './_helpers';
 
 /**
  * Authorization matrix (item 3) — how each op behaves with a degraded
  * subscription key. Currently ZERO coverage of this class.
  *
  * Modes driven through the Try-it console's key dropdown / headers:
- *  - `valid`            — the site-scoped `Primary: API_test` key (control → 2xx).
- *  - `unscoped-own-key` — the account's own default `Primary: 1` key, which is
- *                         NOT scoped to a site. CONFIRMED to blanket-500 every
+ *  - `valid`            — the site-scoped key (`API_KEY_OPTION`, see `_helpers.ts`; control → 2xx).
+ *  - `unscoped-own-key` — the account's own default key (`UNSCOPED_KEY_OPTION`,
+ *                         see `_helpers.ts`), which is NOT scoped to a site.
+ *                         CONFIRMED to blanket-500 every
  *                         operation regardless of shape/host
  *                         (`pages/dev-portal/ApiOperationPage.ts` doc,
  *                         `_helpers.ts` doc, the tenant-scoping bug reports).
@@ -38,8 +39,13 @@ import { fireConsole } from './_helpers';
 export type AuthMode = 'valid' | 'unscoped-own-key' | 'garbage-key-header';
 export type AuthExpect = 'ok' | 'known-bug' | 'hypothesis-reject';
 
-const VALID_KEY = 'Primary: API_test';
-const UNSCOPED_KEY = 'Primary: 1';
+// VALID_KEY / UNSCOPED_KEY were hardcoded literals ('Primary: API_test' /
+// 'Primary: 1') until 2026-09-04 — VALID_KEY's name is confirmed stale (not
+// present in the live subscription-key dropdown as of that date); now
+// sourced from the same env-configurable constants the rest of the suite
+// uses, so a future rename only needs a `.env` change, not a code edit.
+const VALID_KEY = API_KEY_OPTION;
+const UNSCOPED_KEY = UNSCOPED_KEY_OPTION;
 const GARBAGE_KEY = '00000000000000000000000000000000';
 
 export interface AuthOp {

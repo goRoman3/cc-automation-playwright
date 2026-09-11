@@ -12,7 +12,7 @@ import type { BrowserContext, Request, Response } from '@playwright/test';
  * Artifacts land under `artifacts/dev-portal-evidence-<date>/`.
  */
 export const EVIDENCE_ROOT = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29',
 );
 
 const SECRET_HEADERS = new Set([

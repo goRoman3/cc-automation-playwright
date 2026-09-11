@@ -4,7 +4,10 @@ import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import type { ApiOperationPage } from '../../pages/dev-portal/ApiOperationPage';
 import { ApiManagementSettingsPage } from '../../pages/dev-portal/ApiManagementSettingsPage';
-import { STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, currentKeySite } from './_helpers';
+import {
+  STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, currentKeySite,
+  requireExtensionSample, requireSecondSite, noSeedDataReason,
+} from './_helpers';
 
 const KEY_NAME = API_KEY_OPTION.split(': ')[1]; // "API_test" — for the Phase 2 site restore
 
@@ -108,21 +111,23 @@ test.describe('Development portal (staging) — cross-tenant (per-site) write-pa
     // one — every site touched by this whole investigation has real
     // extensions already (14 on UA team recording alone).
     const portal = await DeveloperPortalPage.openFrom(homePage);
+
+    // Early guard — a single-site (or zero-site) Roman_QA_TEST has nowhere
+    // for the operator to manually switch this key to before Phase 2, so
+    // fail fast here rather than after writing a baseline that Phase 2 can
+    // never actually use.
+    const secondSite = await requireSecondSite(portal);
+    test.skip(!secondSite, noSeedDataReason('List Sites found fewer than 2 sites — Phase 2\'s manual switch has nowhere to go.'));
+
     const siteAId = await discoverCurrentSiteId(portal);
     const { name: siteAName } = await currentKeySite(portal);
     console.log('Discovered current siteAId:', siteAId, 'name:', siteAName);
 
-    const listOp = await portal.openOperation('Extension Management', /^List Extensions/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listOp.openConsole();
-    await listOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status, body: extensions } = await sendJson(listOp, portal.raw, {
-      skip: 0, take: 1, sort: [], filter: { logic: 'and', filters: [] },
-    });
-    expect(status).toBe(200);
-    const rows = extensions as Array<{ id: string; name: string }>;
-    expect(rows.length, 'Expected at least one existing extension on the current site to use for this check').toBeGreaterThan(0);
-    const { id: extensionId, name: extensionName } = rows[0];
+    // requireExtensionSample() throws on a non-200 (a real bug, not a seed
+    // gap) and only returns `undefined` for a genuinely empty list.
+    const sample = await requireExtensionSample(portal);
+    test.skip(!sample, noSeedDataReason('List Extensions returned zero extensions on the current site.'));
+    const { id: extensionId, name: extensionName } = sample!;
 
     const baseline: Baseline = { capturedAt: new Date().toISOString(), siteAId, siteAName, extensionId, extensionName };
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(baseline, null, 2));

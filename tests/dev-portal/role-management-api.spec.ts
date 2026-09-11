@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import {
-  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, KNOWN, LIST_BODY,
+  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, TARGET_CUSTOMER_ID, LIST_BODY,
   MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson, openConsole,
 } from './_helpers';
 
@@ -77,11 +77,25 @@ test.describe('Developer Portal (staging) — Role Management API', () => {
 
   test('Create Custom Role → Get Custom Role (KNOWN BUG: ignores roleId)', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
+    const roleName = `AQA coverage role ${Date.now()}`;
     let roleId: string | undefined;
     try {
-      roleId = await createRole(portal, `AQA coverage role ${Date.now()}`);
+      roleId = await createRole(portal, roleName);
 
-      const getOp = await portal.openOperation('Role Management', /^Get Custom Role \(/);
+      // Verify by a SEPARATE request that Create actually persisted the
+      // record — `Get Custom Role` can't be used for this (KNOWN BUG below
+      // ignores its own `roleId`), so use `List Custom Roles` instead.
+      const listOp = await portal.openOperation('Role Management', /^List Custom Roles/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listOp.openConsole();
+      await listOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listStatus, body: roles } = await sendJson(listOp, portal.raw, LIST_BODY);
+      expect(listStatus).toBe(200);
+      const created = (roles as Array<{ id: string; name: string }>).find(r => r.id === roleId);
+      expect(created, 'Expected the newly created role to appear in List Custom Roles').toBeTruthy();
+      expect(created!.name).toBe(roleName);
+
+      const getOp = await portal.openOperation('Role Management', /^Preview Custom Role \(/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await getOp.openConsole();
       await getOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -102,6 +116,7 @@ test.describe('Developer Portal (staging) — Role Management API', () => {
     try {
       const roleName = `AQA coverage role ${Date.now()}`;
       roleId = await createRole(portal, roleName);
+      const updatedName = `${roleName} updated`;
 
       // ADO 37614: { id, name, access, locked, customerId } — `access` is a
       // JSON string of a permission-id array (empty "[]" here).
@@ -110,10 +125,23 @@ test.describe('Developer Portal (staging) — Role Management API', () => {
       await updateOp.openConsole();
       await updateOp.selectSubscriptionKey(API_KEY_OPTION);
       const { status: updateStatus } = await sendJson(updateOp, portal.raw, {
-        id: roleId, name: `${roleName} updated`, access: '[]',
-        locked: false, customerId: KNOWN.customerId,
+        id: roleId, name: updatedName, access: '[]',
+        locked: false, customerId: TARGET_CUSTOMER_ID,
       });
       expect(updateStatus).toBe(200);
+
+      // Verify by a SEPARATE request (re-List, not the Update response) that
+      // the name change actually persisted — `Get Custom Role` can't be used
+      // here either (see the KNOWN BUG above).
+      const verifyOp = await portal.openOperation('Role Management', /^List Custom Roles/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await verifyOp.openConsole();
+      await verifyOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: verifyStatus, body: rolesAfterUpdate } = await sendJson(verifyOp, portal.raw, LIST_BODY);
+      expect(verifyStatus).toBe(200);
+      const persisted = (rolesAfterUpdate as Array<{ id: string; name: string }>).find(r => r.id === roleId);
+      expect(persisted, 'Expected the updated role to still appear in List Custom Roles').toBeTruthy();
+      expect(persisted!.name).toBe(updatedName);
     } finally {
       if (roleId) await tryDeleteRole(portal, roleId);
     }

@@ -71,7 +71,7 @@ test.describe('Developer Portal (staging) — console/UI race evidence', () => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
 
     // Via the console.
-    const o = await openConsole(portal, 'Notifications', /^Get Alert Trigger Operators/, { retries: 4 });
+    const o = await openConsole(portal, 'Notifications', /^List Alert Trigger Operators/, { retries: 4 });
     await o.selectSubscriptionKey(API_KEY_OPTION);
     const m = ev.mark();
     let consoleStatus = -1; let consoleBody: unknown = null; let threw: string | null = null;

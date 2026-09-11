@@ -23,7 +23,7 @@ import { IDEMPOTENCY_SPECS } from './idempotency-checks-catalog';
  * ⚠️ NOT RUN LIVE — `tests/dev-portal/UNVERIFIED.md`.
  */
 const REPORT_PATH = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29/idempotency-checks-matrix-latest.md',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29/idempotency-checks-matrix-latest.md',
 );
 
 test.describe('Development portal (staging) — idempotency & retries matrix', () => {

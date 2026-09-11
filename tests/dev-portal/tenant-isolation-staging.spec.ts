@@ -4,7 +4,10 @@ import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import type { ApiOperationPage } from '../../pages/dev-portal/ApiOperationPage';
 import { ApiManagementSettingsPage } from '../../pages/dev-portal/ApiManagementSettingsPage';
-import { STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, currentKeySite } from './_helpers';
+import {
+  STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, currentKeySite,
+  requireSecondSite, noSeedDataReason,
+} from './_helpers';
 
 const KEY_NAME = API_KEY_OPTION.split(': ')[1]; // "API_test" — for the Phase 2 site restore
 
@@ -53,11 +56,11 @@ interface ReadCheck {
 }
 
 const READ_CHECKS: ReadCheck[] = [
-  { label: 'Get Company Info', group: 'General Settings', operationRegex: /^Get Company Info/ },
-  { label: 'Get SSO Configuration', group: 'General Settings', operationRegex: /^Get SSO Configuration/ },
-  { label: 'Get Storage Locations', group: 'General Settings', operationRegex: /^Get Storage Locations/ },
+  { label: 'Get Company Info', group: 'General Settings', operationRegex: /^Preview Company Info/ },
+  { label: 'Get SSO Configuration', group: 'General Settings', operationRegex: /^Preview SSO Configuration/ },
+  { label: 'Get Storage Locations', group: 'General Settings', operationRegex: /^List Storage Locations/ },
   { label: 'List Logs', group: 'Logs', operationRegex: /^List Logs/, body: LIST_BODY },
-  { label: 'IP Whitelist List', group: 'IP Whitelist', operationRegex: /^IP Whitelist List/, body: LIST_BODY },
+  { label: 'List IP Whitelist', group: 'IP Whitelist', operationRegex: /^List IP Whitelist/, body: LIST_BODY },
   { label: 'List Tags', group: 'Tag Management', operationRegex: /^List Tags/, body: LIST_BODY },
   { label: 'List Sites', group: 'Site Management', operationRegex: /^List Sites/, body: LIST_BODY },
   { label: 'List Custom Roles', group: 'Role Management', operationRegex: /^List Custom Roles/, body: LIST_BODY },
@@ -66,7 +69,7 @@ const READ_CHECKS: ReadCheck[] = [
   { label: 'List Notifications Action Types', group: 'Notifications', operationRegex: /^List Notifications Action Types/ },
   { label: 'List Notifications Participant Types', group: 'Notifications', operationRegex: /^List Notifications Participant Types/ },
   { label: 'List Notifications Trigger Types', group: 'Notifications', operationRegex: /^List Notifications Trigger Types/ },
-  { label: 'Get Alert Trigger Topics', group: 'Notifications', operationRegex: /^Get Alert Trigger Topics/ },
+  { label: 'Get Alert Trigger Topics', group: 'Notifications', operationRegex: /^List Alert Trigger Topics/ },
   { label: 'List Alert Events', group: 'Notifications', operationRegex: /^List Alert Events/, body: LIST_BODY },
   { label: 'List Agents', group: 'Agent Management', operationRegex: /^List Agents/, body: LIST_BODY_100 },
   { label: 'List Extensions', group: 'Extension Management', operationRegex: /^List Extensions/, body: LIST_BODY_100 },
@@ -76,11 +79,11 @@ const READ_CHECKS: ReadCheck[] = [
   { label: 'List Server Heartbeats', group: 'Heartbeats', operationRegex: /^List Server Heartbeats/, body: LIST_BODY },
   { label: 'List Calls', group: 'Calls', operationRegex: /^List Calls/, body: LIST_BODY },
   { label: 'List Report Templates', group: 'Reports', operationRegex: /^List Report Templates/ },
-  { label: 'Get Call Volume Statistics', group: 'Reports', operationRegex: /^Get Call Volume Statistics/ },
-  { label: 'Get Calls Counter', group: 'Reports', operationRegex: /^Get Calls Counter/ },
-  { label: 'Get Sites Storage Usage', group: 'Reports', operationRegex: /^Get Sites Storage Usage/ },
-  { label: 'Get Six Month Call Volume', group: 'Reports', operationRegex: /^Get Six Month Call Volume/ },
-  { label: 'Get All QAs', group: 'QA', operationRegex: /^Get All QAs/ },
+  { label: 'Get Call Volume Statistics', group: 'Reports', operationRegex: /^Preview Call Volume Statistics/ },
+  { label: 'Get Calls Counter', group: 'Reports', operationRegex: /^Preview Calls Counter/ },
+  { label: 'Get Sites Storage Usage', group: 'Reports', operationRegex: /^List Sites Storage Usage/ },
+  { label: 'Get Six Month Call Volume', group: 'Reports', operationRegex: /^Preview Six Month Call Volume/ },
+  { label: 'Get All QAs', group: 'QA', operationRegex: /^List All QAs/ },
 ];
 
 /**
@@ -94,7 +97,7 @@ const NOT_SITE_SCOPED = new Set<string>([
   // across a real site switch on 2026-08-28; these operations have no
   // per-site dimension in their own schema/purpose.
   'Get Company Info', 'Get SSO Configuration', 'Get Storage Locations',
-  'IP Whitelist List', 'List Tags', 'List Users',
+  'List IP Whitelist', 'List Tags', 'List Users',
   // Global reference/lookup lists — same values for every customer/site.
   'List Alert Types', 'List Notifications Action Types',
   'List Notifications Participant Types', 'List Notifications Trigger Types',
@@ -173,6 +176,22 @@ test.describe('Development portal (staging) — cross-tenant (per-site) isolatio
 
   test('Switch — automate the manual site-switch step (Settings > API Management > edit > Save)', async ({ page, homePage }) => {
     test.skip(TENANT_PHASE !== 'switch', 'Run via `npm run test:tenant-switch` (sets TENANT_PHASE=switch)');
+
+    // Early guard — a single-site (or zero-site) Roman_QA_TEST can't
+    // switch to a *different* site at all. Without this, the same failure
+    // still happens, just deeper (inside ApiManagementSettingsPage's site
+    // dropdown, as a UI assertion) and framed as a broken dropdown instead
+    // of what it actually is: no second site to switch to.
+    //
+    // Closes its own portal tab before proceeding — the portal's SSO
+    // session tolerates only one open tab at a time, and `openFrom` always
+    // opens a fresh popup, never reuses one.
+    const portalForSiteCheck = await DeveloperPortalPage.openFrom(homePage);
+    const secondSite = await requireSecondSite(portalForSiteCheck);
+    for (const p of page.context().pages()) {
+      if (p !== page) await p.close().catch(() => {});
+    }
+    test.skip(!secondSite, noSeedDataReason('List Sites found fewer than 2 sites — nothing to switch to.'));
 
     const settings = new ApiManagementSettingsPage(page);
     await settings.goto();

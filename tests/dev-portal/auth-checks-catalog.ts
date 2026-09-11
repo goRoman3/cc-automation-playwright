@@ -17,7 +17,7 @@ import type { AuthOp } from './_auth-checks';
 export const AUTH_OPS: AuthOp[] = [
   {
     id: 'auth/get-company-info', group: 'General Settings', operation: 'Get Company Info',
-    match: /^Get Company Info/,
+    match: /^Preview Company Info/,
     correctBehaviourNote: 'customer-level read — a valid unscoped key should 200; a bad key should 401',
   },
   {
@@ -32,7 +32,7 @@ export const AUTH_OPS: AuthOp[] = [
   },
   {
     id: 'auth/get-sites-storage-usage', group: 'Reports', operation: 'Get Sites Storage Usage',
-    match: /^Get Sites Storage Usage/,
+    match: /^List Sites Storage Usage/,
     correctBehaviourNote: 'site-scoped read (the live site probe) — an unscoped key should 401/403; a bad key should 401',
   },
 ];

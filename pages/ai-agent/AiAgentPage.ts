@@ -30,11 +30,43 @@ import { dismissAnnouncementModal } from '../shared/dismissAnnouncementModal';
  * that: a stuck/timed-out click past that point is the failure this suite
  * exists to catch, not something to paper over.
  */
+/** One observed attempt at the AI Agent's streaming endpoint
+ *  (`api/reports/ai-agent/query/stream`) — see {@link AiAgentPage.streamAttempts}. */
+export interface StreamAttempt {
+  outcome: 'response' | 'requestfailed';
+  /** HTTP status, or the Playwright failure text (e.g. "net::ERR_...") for a
+   *  request that failed before any response arrived. */
+  status: number | string;
+  timestamp: string;
+}
+
 export class AiAgentPage extends BasePage {
   readonly promptInput: Locator;
   readonly startNewConversationButton: Locator;
   readonly createScorecardButton: Locator;
   readonly dismissActionButton: Locator;
+  /**
+   * Every observed attempt at `api/reports/ai-agent/query/stream` since this
+   * page object was constructed — populated live via `page.on('response')` /
+   * `page.on('requestfailed')`, not read back after the fact, so a
+   * mid-stream drop (a `requestfailed` after a 200 `response` for the same
+   * attempt) is visible too, not just the final outcome.
+   *
+   * Investigated live (2026-08-26): a single prompt submission routinely
+   * causes 2 quick 401s on this endpoint before a 200 lands — each 401 used
+   * the same (apparently stale) bearer token, the eventual 200 a different
+   * (refreshed) one. That churn looks like normal token-refresh-on-401
+   * behavior, not itself a bug — but see {@link formatStreamDiagnostics}:
+   * the open question this exists to help answer is whether a run that
+   * never reaches "Create QA Scorecard" is this retry loop failing to ever
+   * land a 200 (or a 200 stream that opens and then drops mid-flight),
+   * matching the ADO-36210-style "agent doesn't respond" reports — this
+   * array is the evidence to check that against per failed run, since
+   * SmarshCR Sales' ~100 recent conversations (shared account) makes the
+   * app's own history/network tab useless for isolating a single test's
+   * attempt after the fact.
+   */
+  readonly streamAttempts: StreamAttempt[] = [];
   /** The "QA Scorecard" label inside the RECOMMENDED SYSTEM ACTIONS card —
    *  its parent element also contains the staged form's name as a sibling
    *  text node. `.last()` because the sidebar's conversation history can
@@ -71,6 +103,51 @@ export class AiAgentPage extends BasePage {
     this.dismissActionButton = page.getByRole('button', { name: 'Dismiss' });
     this.stagedScorecardNameLabel = page.getByText('QA Scorecard', { exact: true }).last();
     this.actionCardExpandIcon = page.locator('[class*="accordion_iconContainer"]').last();
+
+    // Deliberately never reads response/request bodies here — the stream
+    // response is exactly the thing a hung/dropped attempt would never
+    // finish delivering, and awaiting its body would block on the same
+    // hang this is meant to diagnose. Status + timing only.
+    const isStreamRequest = (url: string) => url.includes('/ai-agent/query/stream');
+    page.on('response', resp => {
+      if (isStreamRequest(resp.url())) {
+        this.streamAttempts.push({ outcome: 'response', status: resp.status(), timestamp: new Date().toISOString() });
+      }
+    });
+    page.on('requestfailed', req => {
+      if (isStreamRequest(req.url())) {
+        this.streamAttempts.push({
+          outcome: 'requestfailed',
+          status: req.failure()?.errorText ?? '(no error text)',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    });
+  }
+
+  /** Human-readable dump of every `stream` attempt observed so far this
+   *  page object's lifetime — call from a test's catch block on a
+   *  generation-step failure to see whether the endpoint was ever reached,
+   *  how many 401-refresh retries happened, whether a 200 ever landed, and
+   *  whether a stream that did open (200) then dropped mid-flight
+   *  (a `requestfailed` logged after it). Empty means the request was never
+   *  even sent — a client-side issue before the network call, not the
+   *  endpoint itself. */
+  formatStreamDiagnostics(): string {
+    if (this.streamAttempts.length === 0) {
+      return 'No requests to ai-agent/query/stream were observed at all.';
+    }
+    const lines = this.streamAttempts.map(
+      (a, i) => `  ${i + 1}. [${a.timestamp}] ${a.outcome === 'response' ? `HTTP ${a.status}` : `requestfailed: ${a.status}`}`,
+    );
+    const reached200 = this.streamAttempts.some(a => a.outcome === 'response' && a.status === 200);
+    const droppedAfter200 = this.streamAttempts.some(
+      (a, i) => a.outcome === 'response' && a.status === 200 && this.streamAttempts.slice(i + 1).some(b => b.outcome === 'requestfailed'),
+    );
+    return (
+      `ai-agent/query/stream attempts (${this.streamAttempts.length}):\n${lines.join('\n')}\n` +
+      `Reached a 200: ${reached200}. Dropped after a 200 (requestfailed logged after it): ${droppedAfter200}.`
+    );
   }
 
   async goto(): Promise<void> {

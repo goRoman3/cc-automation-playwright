@@ -32,7 +32,7 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
     let siteId: string | null = null;
     let siteName: string | null = null;
     try {
-      const op = await portal.openOperation('Reports', /^Get Sites Storage Usage/);
+      const op = await portal.openOperation('Reports', /^List Sites Storage Usage/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
       await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -75,7 +75,7 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
     const callId = KNOWN.callId;
 
     // 1 — discover an available QA form for this call.
-    const avail = await fire(portal, ev, 'QA', /^Get Available QAs/, undefined, [['callId', callId]]);
+    const avail = await fire(portal, ev, 'QA', /^List Available QAs/, undefined, [['callId', callId]]);
     expect(avail.status).toBe(200);
     const form = (avail.body as Array<{ id: number; archived: boolean }>).find(f => !f.archived);
     expect(form, 'expected a non-archived QA form').toBeTruthy();
@@ -90,13 +90,13 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
     const listNow = await fire(portal, ev, 'QA', /^List Completed Qas/, undefined, [['callId', callId]]);
 
     // 4 — Get Call Info → hasAnsweredForms.
-    const info = await fire(portal, ev, 'Calls', /^Get Call Info/, undefined, [['callId', callId]]);
+    const info = await fire(portal, ev, 'Calls', /^Preview Call Info/, undefined, [['callId', callId]]);
     const hasAnsweredFormsNow = (info.body as { model?: { hasAnsweredForms?: boolean } }).model?.hasAnsweredForms;
 
     // 5 — wait, then read again.
     await portal.raw.waitForTimeout(5_000);
     const listAfter = await fire(portal, ev, 'QA', /^List Completed Qas/, undefined, [['callId', callId]]);
-    const info2 = await fire(portal, ev, 'Calls', /^Get Call Info/, undefined, [['callId', callId]]);
+    const info2 = await fire(portal, ev, 'Calls', /^Preview Call Info/, undefined, [['callId', callId]]);
     const hasAnsweredFormsAfter = (info2.body as { model?: { hasAnsweredForms?: boolean } }).model?.hasAnsweredForms;
 
     const listCount = (b: unknown) => Array.isArray(b) ? b.length : ((b as { data?: unknown[] })?.data?.length ?? 'n/a');
@@ -308,10 +308,10 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
     const findings: Record<string, unknown> = {};
 
     // ── Get Call PCI Data ────────────────────────────────────────────────
-    const callInfo = await fire(portal, ev, 'Calls', /^Get Call Info/, undefined, [['callId', callId]]);
-    const pciOwn = await fire(portal, ev, 'Calls', /^Get Call PCI Data/, undefined, [['callId', callId]]);
+    const callInfo = await fire(portal, ev, 'Calls', /^Preview Call Info/, undefined, [['callId', callId]]);
+    const pciOwn = await fire(portal, ev, 'Calls', /^Preview Call PCI Data/, undefined, [['callId', callId]]);
     const BOGUS_CALL = '00000000-0000-4000-8000-000000000000';
-    const pciBogus = await fire(portal, ev, 'Calls', /^Get Call PCI Data/, undefined, [['callId', BOGUS_CALL]]);
+    const pciBogus = await fire(portal, ev, 'Calls', /^Preview Call PCI Data/, undefined, [['callId', BOGUS_CALL]]);
     findings.getCallPciData = {
       callInfoStatus: callInfo.status,
       ownCallStatus: pciOwn.status, ownCallBody: pciOwn.body,
@@ -381,7 +381,7 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
     const tpl = templates.find(t => /duration|call/i.test(t.name)) ?? templates[0];
     let rbtStatus: number | null = null; let rbtBody: unknown = null; let rbtCall;
     if (tpl) {
-      const r = await fire(portal, ev, 'Reports', /^Get Report By Template/, {
+      const r = await fire(portal, ev, 'Reports', /^Preview Report By Template/, {
         id: tpl.id, templateId: tpl.id, criteriaId: 1, timeZone: -12,
         startString: '2026-08-01T00:00:00Z', endString: '2026-08-29T23:59:59Z',
         criteriaParams: [], agentParams: [], extensionParams: [],
@@ -425,7 +425,7 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
     const idMatch = /Notification Config '(\d+)'/.exec((upsert.body as { configResult?: string })?.configResult ?? '');
     const alertId = idMatch ? Number(idMatch[1]) : null;
     const getCfg = alertId != null
-      ? await fire(portal, ev, 'Notifications', /^Get Alert Configuration/, undefined, [['notificationId', String(alertId)]])
+      ? await fire(portal, ev, 'Notifications', /^Preview Alert Configuration/, undefined, [['notificationId', String(alertId)]])
       : { status: -1, body: null, call: undefined };
 
     // Preview Alert Log — populated triggers, then empty triggers.
@@ -438,9 +438,9 @@ test.describe('Developer Portal (staging) — batch 2 evidence', () => {
 
     // Get Alert Notification (old) — real id, then bogus.
     const oldReal = alertId != null
-      ? await fire(portal, ev, 'Notifications', /^Get Alert Notification/, undefined, [['notificationId', String(alertId)]])
+      ? await fire(portal, ev, 'Notifications', /^Preview\s+Alert Notification/, undefined, [['notificationId', String(alertId)]])
       : { status: -1, body: null, call: undefined };
-    const oldBogus = await fire(portal, ev, 'Notifications', /^Get Alert Notification/, undefined, [['notificationId', '1']]);
+    const oldBogus = await fire(portal, ev, 'Notifications', /^Preview\s+Alert Notification/, undefined, [['notificationId', '1']]);
 
     // Cleanup the alert config.
     let delCfgStatus: number | null = null;

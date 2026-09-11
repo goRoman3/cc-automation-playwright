@@ -43,6 +43,7 @@ test.describe('Developer Portal (staging) — Manual Redaction API', () => {
     // Live per-run — NOT the site-bound `KNOWN.callId` constant.
     const callId = await firstOwnSiteCallId(portal);
     const startMilliseconds = Date.now() % 100_000;
+    const requestText = 'AQA coverage redaction test';
     const op = await portal.openOperation('Manual Redaction', /^Submit Call Redaction Request/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
@@ -50,9 +51,21 @@ test.describe('Developer Portal (staging) — Manual Redaction API', () => {
     await op.addParameter('callId', callId);
     const { status, body } = await sendJson(op, portal.raw, {
       callId, entityTypeId: 1, startMilliseconds, endMilliseconds: startMilliseconds + 5000,
-      requestText: 'AQA coverage redaction test',
+      requestText,
     });
     expect(status).toBe(200);
     expect(body).toBe('Successfully created redaction request');
+
+    // Verify by a SEPARATE request (List Call Redaction Requests, not the
+    // Submit response) that the request actually persisted.
+    const listOp = await portal.openOperation('Manual Redaction', /^List Call Redaction Requests/);
+    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+    await listOp.openConsole();
+    await listOp.selectSubscriptionKey(API_KEY_OPTION);
+    await listOp.addParameter('callId', callId);
+    const { status: listStatus, body: requests } = await listOp.send();
+    expect(listStatus).toBe(200);
+    expect(Array.isArray(requests) && requests.length > 0, 'Expected at least one redaction request for this call').toBeTruthy();
+    expect(JSON.stringify(requests)).toContain(requestText);
   });
 });

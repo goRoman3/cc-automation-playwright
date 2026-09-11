@@ -31,7 +31,7 @@ test.describe('Developer Portal (staging) — P0 evidence', () => {
     let siteId: string | null = null;
     let siteName: string | null = null;
     try {
-      const op = await portal.openOperation('Reports', /^Get Sites Storage Usage/);
+      const op = await portal.openOperation('Reports', /^List Sites Storage Usage/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
       await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -98,7 +98,7 @@ test.describe('Developer Portal (staging) — P0 evidence', () => {
       ?? (created as { site?: string }).site;
 
     // Step 3 — Get Agent immediately.
-    const getOp = await portal.openOperation('Agent Management', /^Get Agent \(/);
+    const getOp = await portal.openOperation('Agent Management', /^Preview Agent \(/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await getOp.openConsole();
     await getOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -130,7 +130,7 @@ test.describe('Developer Portal (staging) — P0 evidence', () => {
     const update2Call = ev.apiSince(m).at(-1);
 
     // Step 6 — Get Agent after failed Update (still there?).
-    const getOp2 = await portal.openOperation('Agent Management', /^Get Agent \(/);
+    const getOp2 = await portal.openOperation('Agent Management', /^Preview Agent \(/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await getOp2.openConsole();
     await getOp2.selectSubscriptionKey(API_KEY_OPTION);
@@ -325,7 +325,7 @@ test.describe('Developer Portal (staging) — P0 evidence', () => {
     // Step 3 — Get Custom Role with the REAL id, 3×.
     const realResults: { roleId: string; status: number; body: unknown; call: unknown }[] = [];
     for (let i = 0; i < 3; i++) {
-      const getOp = await portal.openOperation('Role Management', /^Get Custom Role \(/);
+      const getOp = await portal.openOperation('Role Management', /^Preview Custom Role \(/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await getOp.openConsole();
       await getOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -339,7 +339,7 @@ test.describe('Developer Portal (staging) — P0 evidence', () => {
     const BOGUS = '11111111-1111-1111-1111-111111111111';
     const bogusResults: { roleId: string; status: number; body: unknown; call: unknown }[] = [];
     for (let i = 0; i < 2; i++) {
-      const getOp = await portal.openOperation('Role Management', /^Get Custom Role \(/);
+      const getOp = await portal.openOperation('Role Management', /^Preview Custom Role \(/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await getOp.openConsole();
       await getOp.selectSubscriptionKey(API_KEY_OPTION);

@@ -3,23 +3,29 @@ import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage'
 import {
   API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS,
   MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson, currentSiteId,
+  requireDisposableReportTemplate, noSeedDataReason,
 } from './_helpers';
 
 /**
  * Reports group (staging) — 10/10 operations covered: 9 happy-path + 1
  * KNOWN BUG regression.
  *
- * - `Get Storage Usage` bakes an unfilled `{siteId}` into the GET URL and
+ * - `Preview Storage Usage` bakes an unfilled `{siteId}` into the GET URL and
  *   never renders a field — `addParameter('siteId', ...)` overrides the
- *   baked placeholder here (unlike "Get Alert Trigger Operators").
- * - `Get User Activity Summary` — `period` (enum 0/1/2) is required despite
+ *   baked placeholder here (unlike "List Alert Trigger Operators").
+ * - `Preview User Activity Summary` — `period` (enum 0/1/2) is required despite
  *   the description implying it is optional.
  * - `Delete Report Template` has no create counterpart; it targets one of
  *   the hundreds of obviously-disposable accumulated test templates
  *   (`Test_Post`, `stephan`, `temp1`, …), highest id first so repeat runs
  *   don't collide. Skips if none is left.
- * - KNOWN BUG — `Get Report By Template` always 500s with a fully
+ * - KNOWN BUG — `Preview Report By Template` always 500s with a fully
  *   schema-correct body (server-side NullReferenceException).
+ *
+ * Naming trap (same class fixed 2026-08-27 for Agent/Extension/Custom
+ * Role/Agent Group, missed here at the time): per the 2026-09-04 APIM
+ * catalogue recon, every single-record fetch in this group is
+ * **"Preview X"**, every collection fetch **"List X"** — never "Get X".
  */
 test.describe('Developer Portal (staging) — Reports API', () => {
   test.describe.configure({ timeout: 90_000 });
@@ -28,8 +34,8 @@ test.describe('Developer Portal (staging) — Reports API', () => {
   test.afterEach(async ({ page }) => { await closeExtraTabs(page); });
 
   for (const opName of [
-    'List Report Templates', 'Get Call Volume Statistics', 'Get Calls Counter',
-    'Get Sites Storage Usage', 'Get Six Month Call Volume',
+    'List Report Templates', 'Preview Call Volume Statistics', 'Preview Calls Counter',
+    'List Sites Storage Usage', 'Preview Six Month Call Volume',
   ]) {
     test(`${opName} — 200`, async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
@@ -42,7 +48,7 @@ test.describe('Developer Portal (staging) — Reports API', () => {
     });
   }
 
-  for (const opName of ['Get Site Usage Statistics', 'Get Storage Usage']) {
+  for (const opName of ['Preview Site Usage Statistics', 'Preview Storage Usage']) {
     test(`${opName} — 200 (siteId query param)`, async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
       // Live per-run — NOT the site-bound `KNOWN.siteId` constant.
@@ -57,9 +63,9 @@ test.describe('Developer Portal (staging) — Reports API', () => {
     });
   }
 
-  test('Get User Activity Summary — 200 (period is a required enum)', async ({ homePage }) => {
+  test('Preview User Activity Summary — 200 (period is a required enum)', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const op = await portal.openOperation('Reports', /^Get User Activity Summary/);
+    const op = await portal.openOperation('Reports', /^Preview User Activity Summary/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -70,16 +76,8 @@ test.describe('Developer Portal (staging) — Reports API', () => {
 
   test('Delete Report Template — removes an existing disposable test template (no Add/Create op exists)', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const listOp = await portal.openOperation('Reports', /^List Report Templates/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listOp.openConsole();
-    await listOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status: listStatus, body: templates } = await listOp.send();
-    expect(listStatus).toBe(200);
-    const disposable = (templates as Array<{ id: number; name: string }>)
-      .filter(t => /^(Test_Post|stephan|temp\d*|ttemp\d*|savetemptest\d*)$/i.test(t.name))
-      .sort((a, b) => b.id - a.id)[0];
-    test.skip(!disposable, 'No disposable-looking test template left to delete this run');
+    const disposable = await requireDisposableReportTemplate(portal);
+    test.skip(!disposable, noSeedDataReason('No disposable-looking report template found, and this API group has no Create operation to seed one.'));
 
     const deleteOp = await portal.openOperation('Reports', /^Delete Report Template/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
@@ -88,11 +86,23 @@ test.describe('Developer Portal (staging) — Reports API', () => {
     await deleteOp.addParameter('id', String(disposable!.id));
     const { status: deleteStatus } = await deleteOp.send();
     expect(deleteStatus).toBe(200);
+
+    // Verify by a SEPARATE request that Delete actually removed the template.
+    const listAfterDeleteOp = await portal.openOperation('Reports', /^List Report Templates/);
+    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+    await listAfterDeleteOp.openConsole();
+    await listAfterDeleteOp.selectSubscriptionKey(API_KEY_OPTION);
+    const { status: listAfterDeleteStatus, body: templatesAfterDelete } = await listAfterDeleteOp.send();
+    expect(listAfterDeleteStatus).toBe(200);
+    expect(
+      (templatesAfterDelete as Array<{ id: number }>).some(t => t.id === disposable!.id),
+      'Expected the deleted template to no longer appear in List Report Templates',
+    ).toBe(false);
   });
 
-  test('KNOWN BUG — Get Report By Template always 500s with a fully schema-correct body', async ({ homePage }) => {
+  test('KNOWN BUG — Preview Report By Template always 500s with a fully schema-correct body', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const op = await portal.openOperation('Reports', /^Get Report By Template/);
+    const op = await portal.openOperation('Reports', /^Preview Report By Template/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);

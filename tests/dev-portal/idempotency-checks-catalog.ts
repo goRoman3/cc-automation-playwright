@@ -1,4 +1,4 @@
-import { KNOWN, ruleDto, alertDto } from './_helpers';
+import { TARGET_CUSTOMER_ID, ruleDto, alertDto } from './_helpers';
 import { NEG_FIELD_SPECS } from './negative-fields-catalog';
 import type { IdempSpec } from './_idempotency-checks';
 
@@ -70,7 +70,7 @@ export const IDEMPOTENCY_SPECS: IdempSpec[] = [
     scenarios: {
       updateNonexistent: {
         updateMatch: /^Update Agent Group/,
-        body: () => ({ id: BOGUS_INT, customerId: KNOWN.customerId, name: 'AQA idem nx', isActive: true, agentJson: '[]' }),
+        body: () => ({ id: BOGUS_INT, customerId: TARGET_CUSTOMER_ID, name: 'AQA idem nx', isActive: true, agentJson: '[]' }),
       },
     },
   },

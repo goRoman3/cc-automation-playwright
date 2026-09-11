@@ -11,7 +11,30 @@ import { type Page, type Locator, expect } from '@playwright/test';
  * network response the "Send" click fires against the API Management
  * gateway (`developer.callcabinet.com`, distinct from the portal's own
  * `developer-portal.callcabinet.com` host).
+ *
+ * **Gateway host is per-company, not fixed** (found 2026-09-04): the
+ * `developer1?\.callcabinet\.com` custom domains are what CC Test 1 fronts
+ * its gateway with, but they're an alias over the real underlying Azure APIM
+ * instance — even a 2026-08-21 diagnostic against CC Test 1 shows the
+ * gateway's own `www-authenticate` response header naming its real identity
+ * as `smarshcra-apim-staging.azure-api.net` (`recon/output/dev-api-diag-*.json`
+ * in the sibling `cloude` project). A live smoke test the same day against a
+ * *different* company, **Roman_QA_TEST**, confirmed by request trace that its
+ * gateway is reached directly at `smarshcra-apim-staging-eus2.azure-api.net`
+ * (a distinct, "-eus2"-suffixed instance) with no `developer1.callcabinet.com`
+ * custom domain involved at all — the portal itself is embedded straight off
+ * `smarshcra-apim-staging-eus2.developer.azure-api.net` (note the extra
+ * `developer.` label — that's the portal's own CMS/management-API traffic,
+ * NOT a gateway response, and must stay excluded). `isGatewayResponseUrl()`
+ * below accepts both confirmed families; it does NOT generalize to an
+ * unverified `*.azure-api.net` wildcard or an unverified `-<suffix>` pattern
+ * — only the two host names actually observed. Extend this list only from a
+ * new confirmed observation (a live trace or a `www-authenticate` header),
+ * never by guessing at the naming convention.
  */
+export function isGatewayResponseUrl(url: string): boolean {
+  return /(developer1?\.callcabinet\.com|smarshcra-apim-staging(-eus2)?\.azure-api\.net)\//.test(url);
+}
 export class ApiOperationPage {
   readonly tryThisOperationButton: Locator;
   readonly sendButton: Locator;
@@ -304,11 +327,13 @@ export class ApiOperationPage {
    * `atmossystemstaging.callcabinet.com`) or `developer1.callcabinet.com`
    * (staging gateway, reached via `atmossystemsstaging.callcabinet.com` —
    * note the extra "s") — see the per-site tenant scoping bug report for
-   * why these two easily-confused hosts matter.
+   * why these two easily-confused hosts matter — plus the per-company
+   * `smarshcra-apim-staging(-eus2)` Azure-native hosts, see
+   * `isGatewayResponseUrl()`'s doc above the class for the evidence.
    */
   async send(): Promise<{ status: number; body: unknown }> {
     const responsePromise = this.page.waitForResponse(
-      r => /developer1?\.callcabinet\.com\//.test(r.url()),
+      r => isGatewayResponseUrl(r.url()),
       { timeout: 30_000 },
     );
     await this.clickButtonRobustly('Send');

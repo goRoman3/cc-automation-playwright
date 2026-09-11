@@ -26,7 +26,7 @@ test.describe('Developer Portal (staging) — security + scoping + env evidence'
 
   async function readKeySite(portal: DeveloperPortalPage): Promise<{ id: string | null; name: string | null }> {
     try {
-      const o = await openConsole(portal, 'Reports', /^Get Sites Storage Usage/, { retries: 4 });
+      const o = await openConsole(portal, 'Reports', /^List Sites Storage Usage/, { retries: 4 });
       await o.selectSubscriptionKey(API_KEY_OPTION);
       const { body } = await o.send();
       const f = (body as Array<{ siteId?: string; id?: string; siteName?: string; name?: string }>)[0];
@@ -88,7 +88,7 @@ test.describe('Developer Portal (staging) — security + scoping + env evidence'
         userId: targetId, agentIds: [], siteIds: [siteA.id], groupIds: [],
       });
       bindStatus = bind.status;
-      getA = await fire(portal, ev, 'Restricted User Management', /^Get Restricted User/, undefined, [['userId', targetId]]);
+      getA = await fire(portal, ev, 'Restricted User Management', /^Preview Restricted User/, undefined, [['userId', targetId]]);
     }
 
     // ── STEP 2 — scoping-gap baselines under site A ──
@@ -124,7 +124,7 @@ test.describe('Developer Portal (staging) — security + scoping + env evidence'
     let updateB: { status: number; body: unknown; call?: CapturedCall } = { status: -1, body: null };
     if (!switchThrew && targetId) {
       listB = await fire(portal, ev, 'Restricted User Management', /^List Restricted Accesses/, LIST_BODY_100);
-      getB = await fire(portal, ev, 'Restricted User Management', /^Get Restricted User/, undefined, [['userId', targetId]]);
+      getB = await fire(portal, ev, 'Restricted User Management', /^Preview Restricted User/, undefined, [['userId', targetId]]);
       updateB = await fire(portal, ev, 'Restricted User Management', /^Update Restricted User Access/, {
         userId: targetId, agentIds: [], siteIds: [siteA.id], groupIds: [],
       });

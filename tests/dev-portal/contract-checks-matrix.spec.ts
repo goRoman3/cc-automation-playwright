@@ -28,7 +28,7 @@ import { CONTRACT_SPECS, CONTRACT_EXCLUDED } from './contract-checks-catalog';
  * assertions are hypothetical.
  */
 const REPORT_PATH = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29/contract-checks-matrix-latest.md',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29/contract-checks-matrix-latest.md',
 );
 
 test.describe('Development portal (staging) — response-contract matrix', () => {

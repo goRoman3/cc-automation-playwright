@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import {
-  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, LIST_BODY,
+  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, LIST_BODY, ADMIN_EMAIL,
   MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson,
   firstOwnSiteCall, firstOwnSiteCallId, assignedTagId,
 } from './_helpers';
@@ -30,7 +30,7 @@ test.describe('Developer Portal (staging) — Calls API', () => {
   test.beforeEach(async ({ page, loginPage }) => { await stagingLogin(page, loginPage); });
   test.afterEach(async ({ page }) => { await closeExtraTabs(page); });
 
-  test('Add Call Note → Get Call Notes → Update Call Note → Edit Call Note Details → Delete Call Note', async ({ homePage }) => {
+  test('Add Call Note → List Call Notes → Update Call Note → Update Call Note Details → Delete Call Note', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const callId = await firstOwnSiteCallId(portal);
 
@@ -46,7 +46,7 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     const noteId = (added as { id: string }).id;
     expect(noteId).toBeTruthy();
 
-    const getOp = await portal.openOperation('Calls', /^Get Call Notes/);
+    const getOp = await portal.openOperation('Calls', /^List Call Notes/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await getOp.openConsole();
     await getOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -55,6 +55,19 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     expect(getStatus).toBe(200);
     expect((notes as Array<{ NoteID: string }>).some(n => n.NoteID === noteId)).toBe(true);
 
+    /** Re-reads this test's note back via `List Call Notes` (no single-note fetch op exists). */
+    async function getNote(): Promise<Record<string, unknown> | undefined> {
+      const op = await portal.openOperation('Calls', /^List Call Notes/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await op.openConsole();
+      await op.selectSubscriptionKey(API_KEY_OPTION);
+      await op.addParameter('callId', callId);
+      const { status, body } = await op.send();
+      expect(status).toBe(200);
+      return (body as Array<Record<string, unknown>>).find(n => n.NoteID === noteId);
+    }
+
+    const updatedNoteText = `AQA coverage note ${Date.now()} updated`;
     const updateOp = await portal.openOperation('Calls', /^Update Call Note/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await updateOp.openConsole();
@@ -62,12 +75,19 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     await updateOp.addParameter('callId', callId);
     await updateOp.addParameter('noteId', noteId);
     const { status: updateStatus, body: updateBody } = await sendJson(updateOp, portal.raw, {
-      noteId, note: `AQA coverage note ${Date.now()} updated`,
+      noteId, note: updatedNoteText,
     });
     expect(updateStatus).toBe(200);
     expect(updateBody).toBe('success');
 
-    const detailsOp = await portal.openOperation('Calls', /^Edit Call Note Details/);
+    // Verify by a SEPARATE request (re-List Call Notes, not the Update
+    // response) that the text change actually persisted.
+    const noteAfterUpdate = await getNote();
+    expect(noteAfterUpdate, 'Expected the updated note to still appear in List Call Notes').toBeTruthy();
+    expect(JSON.stringify(noteAfterUpdate)).toContain(updatedNoteText);
+
+    const updatedDetailsText = `AQA coverage note details ${Date.now()}`;
+    const detailsOp = await portal.openOperation('Calls', /^Update Call Note Details/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await detailsOp.openConsole();
     await detailsOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -75,10 +95,15 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     await detailsOp.addParameter('noteId', noteId);
     // Bare JSON string body, not an object (per the op's OpenAPI export).
     const { status: detailsStatus, body: detailsBody } = await sendJson(
-      detailsOp, portal.raw, `AQA coverage note details ${Date.now()}`,
+      detailsOp, portal.raw, updatedDetailsText,
     );
     expect(detailsStatus).toBe(200);
     expect((detailsBody as { Id: string }).Id).toBe(noteId);
+
+    // Verify by a SEPARATE request that the details change actually persisted.
+    const noteAfterDetails = await getNote();
+    expect(noteAfterDetails, 'Expected the note to still appear in List Call Notes after Update Call Note Details').toBeTruthy();
+    expect(JSON.stringify(noteAfterDetails)).toContain(updatedDetailsText);
 
     const deleteOp = await portal.openOperation('Calls', /^Delete Call Note/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
@@ -88,6 +113,10 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     await deleteOp.addParameter('noteId', noteId);
     const { status: deleteStatus } = await deleteOp.send();
     expect(deleteStatus).toBe(200);
+
+    // Verify by a SEPARATE request that Delete actually removed the note.
+    const noteAfterDelete = await getNote();
+    expect(noteAfterDelete, 'Expected the deleted note to no longer appear in List Call Notes').toBeUndefined();
   });
 
   test('Update Call Tags — re-applies the call\'s own already-assigned tag (no-op-safe)', async ({ homePage }) => {
@@ -103,6 +132,10 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     const { status, body } = await sendJson(op, portal.raw, { callId: call.id, tagsIds: [tagId!] });
     expect(status).toBe(200);
     expect((body as Array<{ Id: string; IsAssigned: boolean }>).find(t => t.Id.toLowerCase() === tagId!.toLowerCase())?.IsAssigned).toBe(true);
+
+    // Verify by a SEPARATE request (re-Get Call Info, not the Update
+    // response) that the tag assignment actually persisted.
+    expect((await assignedTagId(portal, call.id))?.toLowerCase()).toBe(tagId!.toLowerCase());
   });
 
   test('Update Multiple Call Tags — batch variant, same no-op-safe tag', async ({ homePage }) => {
@@ -119,6 +152,10 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     });
     expect(status).toBe(200);
     expect((body as Array<{ CallId: string }>)[0].CallId).toBe(call.id);
+
+    // Verify by a SEPARATE request (re-Get Call Info, not the Update
+    // response) that the tag assignment actually persisted.
+    expect((await assignedTagId(portal, call.id))?.toLowerCase()).toBe(tagId!.toLowerCase());
   });
 
   test('Update Legal Hold — toggles per call, restored to its original state', async ({ homePage }) => {
@@ -132,6 +169,15 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     const { status: onStatus, body: onBody } = await op.send();
     expect(onStatus).toBe(200);
     expect(onBody).toBe(true);
+
+    // The second call is a SEPARATE round trip to the backend, not a reread
+    // of the first response. There's no independent read-only endpoint for
+    // legal-hold status (this toggle op is the only one the catalogue
+    // exposes), but the toggle semantics still prove persistence: it flips
+    // whatever the server currently has stored, so getting `false` back here
+    // is only possible if the first call's `true` actually persisted — a
+    // no-op/unpersisted first call would flip from the original state again
+    // and return `true` a second time.
     const { status: offStatus, body: offBody } = await op.send();
     expect(offStatus).toBe(200);
     expect(offBody).toBe(false);
@@ -151,6 +197,11 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     expect(status).toBe(200);
     expect(body).toBe('Success');
 
+    // Verify by a SEPARATE operation (Update Legal Hold, not Batch Apply's
+    // own response) that the batch write actually persisted: this toggle
+    // flips whatever the server currently has stored, so it returning
+    // `false` here is only possible if Batch Apply's `true` was really
+    // written — this call is also this test's restore-to-original step.
     const restoreOp = await portal.openOperation('Calls', /^Update Legal Hold/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await restoreOp.openConsole();
@@ -160,10 +211,10 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     expect(restoredBody).toBe(false);
   });
 
-  test('Get Call Info — 200', async ({ homePage }) => {
+  test('Preview Call Info — 200', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const callId = await firstOwnSiteCallId(portal);
-    const op = await portal.openOperation('Calls', /^Get Call Info/);
+    const op = await portal.openOperation('Calls', /^Preview Call Info/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -183,7 +234,7 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     expect(status).toBe(200);
   });
 
-  for (const opName of ['Get Linked Calls', 'Get Call Transcription']) {
+  for (const opName of ['List Linked Calls', 'Preview Call Transcription']) {
     test(`${opName} — 200`, async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
       const callId = await firstOwnSiteCallId(portal);
@@ -241,7 +292,7 @@ test.describe('Developer Portal (staging) — Calls API', () => {
   test('KNOWN BUG — Get Call PCI Data always 500s for a real, valid call', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const callId = await firstOwnSiteCallId(portal);
-    const op = await portal.openOperation('Calls', /^Get Call PCI Data/);
+    const op = await portal.openOperation('Calls', /^Preview Call PCI Data/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -258,7 +309,7 @@ test.describe('Developer Portal (staging) — Calls API', () => {
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
     const { status } = await sendJson(op, portal.raw, {
-      mails: ['romana@callcabinet.com'], callId, subject: 'AQA coverage test email',
+      mails: [ADMIN_EMAIL!], callId, subject: 'AQA coverage test email',
       text: 'AQA coverage test - safe to ignore', callIds: [callId],
     });
     expect(status).toBe(500);
