@@ -35,7 +35,7 @@ import { NEG_FIELD_SPECS, EXCLUDED_FROM_NEG_MATRIX } from './negative-fields-cat
  * two ops excluded here (Add User, Manual Redaction).
  */
 const REPORT_PATH = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29/negative-required-fields-matrix-latest.md',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29/negative-required-fields-matrix-latest.md',
 );
 
 test.describe('Development portal (staging) — negative-required-fields matrix', () => {

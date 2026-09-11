@@ -2,7 +2,7 @@ import type { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortal
 import { CATALOG } from './cross-tenant-catalog';
 import type { CatalogEntry, ReadPlan, WritePlan } from './_cross-tenant';
 import {
-  KNOWN, LIST_BODY, LIST_BODY_100, fireConsole,
+  TARGET_CUSTOMER_ID, LIST_BODY, LIST_BODY_100, fireConsole,
   firstOwnSiteCall, currentSiteId, assignedTagId, agentDto, ruleDto, alertDto,
 } from './_helpers';
 
@@ -67,7 +67,7 @@ const resolveGroupId = async (portal: DeveloperPortalPage): Promise<Record<strin
 /** `resolve` for a callId + the first available (non-archived) QA form id for it. */
 const resolveCallAndForm = async (portal: DeveloperPortalPage): Promise<Record<string, string>> => {
   const { id: callId } = await firstOwnSiteCall(portal);
-  const res = await fireConsole(portal, 'QA', /^Get Available QAs/, { params: [['callId', callId]] });
+  const res = await fireConsole(portal, 'QA', /^List Available QAs/, { params: [['callId', callId]] });
   const form = (res.body as Array<{ id: number; archived: boolean }>)?.find(f => !f.archived);
   return { callId, formId: form ? String(form.id) : '' };
 };
@@ -104,7 +104,7 @@ export const READ_PLANS: Record<string, ReadPlan> = {
     resolve: resolveAgent,
     params: r => [['agentId', r.agentId]],
     expectation: 'must-differ',
-    byId: { pick: b => String((b as { id?: string })?.id ?? '') || null, operation: /^Get Agent \(/, param: 'agentId' },
+    byId: { pick: b => String((b as { id?: string })?.id ?? '') || null, operation: /^Preview Agent \(/, param: 'agentId' },
   },
   'agent-mgmt/get-supervisors': listTriage(),
   'agent-mgmt/get-agent-extensions': {
@@ -118,7 +118,7 @@ export const READ_PLANS: Record<string, ReadPlan> = {
   'calls/list-calls': listMustDiffer(LIST_BODY),
   'calls/get-call-info': {
     resolve: resolveCallId, params: r => [['callId', r.callId]], expectation: 'must-differ',
-    byId: { pick: b => String((b as { model?: { id?: string } })?.model?.id ?? '') || null, operation: /^Get Call Info/, param: 'callId' },
+    byId: { pick: b => String((b as { model?: { id?: string } })?.model?.id ?? '') || null, operation: /^Preview Call Info/, param: 'callId' },
   },
   'calls/get-call-notes': { resolve: resolveCallId, params: r => [['callId', r.callId]], expectation: 'triage' },
   'calls/get-linked-calls': { resolve: resolveCallId, params: r => [['callId', r.callId]], expectation: 'triage' },
@@ -137,7 +137,7 @@ export const READ_PLANS: Record<string, ReadPlan> = {
   'ext-mgmt/list-extensions': listMustDiffer(LIST_BODY_100),
   'ext-mgmt/get-extension': {
     resolve: resolveExtensionId, params: r => [['extensionId', r.extensionId]], expectation: 'must-differ',
-    byId: { pick: pickFirstId, operation: /^Get Extension/, param: 'extensionId' },
+    byId: { pick: pickFirstId, operation: /^Preview Extension/, param: 'extensionId' },
   },
 
   // General Settings — customer-level
@@ -149,7 +149,7 @@ export const READ_PLANS: Record<string, ReadPlan> = {
   'group-mgmt/list-agent-groups': listMustDiffer(LIST_BODY_100),
   'group-mgmt/get-agent-group': {
     resolve: resolveGroupId, params: r => [['groupId', r.groupId]], expectation: 'must-differ',
-    byId: { pick: pickFirstId, operation: /^Get Agent Group \(/, param: 'groupId' },
+    byId: { pick: pickFirstId, operation: /^Preview Agent Group \(/, param: 'groupId' },
   },
 
   // Heartbeats
@@ -219,7 +219,7 @@ export const READ_PLANS: Record<string, ReadPlan> = {
   'restricted-user/list-restricted-accesses': { body: LIST_BODY_100, expectation: 'hypothesis' },
   'restricted-user/get-restricted-user': {
     resolve: resolveRestrictedUserId, params: r => [['userId', r.userId]], expectation: 'hypothesis',
-    byId: { pick: b => String((b as { id?: string })?.id ?? '') || null, operation: /^Get Restricted User/, param: 'userId' },
+    byId: { pick: b => String((b as { id?: string })?.id ?? '') || null, operation: /^Preview Restricted User/, param: 'userId' },
   },
 
   // Retention Management
@@ -235,7 +235,7 @@ export const READ_PLANS: Record<string, ReadPlan> = {
   'user-mgmt/list-users': listGlobal(LIST_BODY),
   'user-mgmt/get-user': {
     resolve: resolveUserId, params: r => [['userId', r.userId]], expectation: 'known-global',
-    byId: { pick: pickFirstId, operation: /^Get User/, param: 'userId' },
+    byId: { pick: pickFirstId, operation: /^Preview User/, param: 'userId' },
   },
 };
 
@@ -276,7 +276,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
     },
     attempt: { verb: 'delete', operation: /^Delete Agent \(/, params: f => [['agentId', f.agentId]] },
     verifyIntact: async (portal, f) => {
-      const res = await fireConsole(portal, 'Agent Management', /^Get Agent \(/, { params: [['agentId', f.agentId]] });
+      const res = await fireConsole(portal, 'Agent Management', /^Preview Agent \(/, { params: [['agentId', f.agentId]] });
       return { ok: res.status === 200, detail: `Get Agent → ${res.status}` };
     },
     destructiveIfLeaked: true,
@@ -359,7 +359,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       mode: 'create',
       run: async portal => ({ callId: (await firstOwnSiteCall(portal)).id, marker: `xt-add-${Date.now()}` }),
       remove: async (portal, f) => {
-        const notes = await fireConsole(portal, 'Calls', /^Get Call Notes/, { params: [['callId', f.callId]] });
+        const notes = await fireConsole(portal, 'Calls', /^List Call Notes/, { params: [['callId', f.callId]] });
         const hit = rowsOf(notes.body).find(n => String(n.Note ?? n.note ?? '').includes(f.marker));
         if (hit) await fireConsole(portal, 'Calls', /^Delete Call Note/, { params: [['callId', f.callId], ['noteId', String(hit.NoteID ?? hit.id)]] });
       },
@@ -390,7 +390,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
     },
     attempt: { verb: 'delete', operation: /^Delete Call Note/, params: f => [['callId', f.callId], ['noteId', f.noteId]] },
     verifyIntact: async (portal, f) => {
-      const notes = await fireConsole(portal, 'Calls', /^Get Call Notes/, { params: [['callId', f.callId]] });
+      const notes = await fireConsole(portal, 'Calls', /^List Call Notes/, { params: [['callId', f.callId]] });
       return { ok: rowsOf(notes.body).some(n => String(n.NoteID ?? n.id) === f.noteId), detail: 'note present in Get Call Notes' };
     },
     destructiveIfLeaked: true,
@@ -406,7 +406,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       remove: async (portal, f) => { if (f.noteId) await fireConsole(portal, 'Calls', /^Delete Call Note/, { params: [['callId', f.callId], ['noteId', f.noteId]] }); },
     },
     // bare JSON-string body, per calls-api.spec.ts
-    attempt: { verb: 'update', operation: /^Edit Call Note Details/, body: () => `xt-details ${Date.now()} B`, params: f => [['callId', f.callId], ['noteId', f.noteId]] },
+    attempt: { verb: 'update', operation: /^Update Call Note Details/, body: () => `xt-details ${Date.now()} B`, params: f => [['callId', f.callId], ['noteId', f.noteId]] },
   },
   'calls/update-call-tags': {
     fixture: {
@@ -443,7 +443,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       // Update Legal Hold toggles + returns the new state. If the cross-site
       // call leaked it flipped once — call Get Call Info; if legalHold is now
       // true, toggle it back from site A.
-      const info = await fireConsole(portal, 'Calls', /^Get Call Info/, { params: [['callId', f.callId]] });
+      const info = await fireConsole(portal, 'Calls', /^Preview Call Info/, { params: [['callId', f.callId]] });
       const held = Boolean((info.body as { model?: { legalHold?: boolean } })?.model?.legalHold);
       if (held) await fireConsole(portal, 'Calls', /^Update Legal Hold/, { params: [['callId', f.callId]] });
       return { ok: !held, detail: held ? 'legalHold was ON — toggled back from site A' : 'legalHold unchanged' };
@@ -459,7 +459,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
     // form-urlencoded comma-separated call ids — bare string body
     attempt: { verb: 'update', operation: /^Batch Apply Legal Hold/, body: f => f.callId },
     verifyIntact: async (portal, f) => {
-      const info = await fireConsole(portal, 'Calls', /^Get Call Info/, { params: [['callId', f.callId]] });
+      const info = await fireConsole(portal, 'Calls', /^Preview Call Info/, { params: [['callId', f.callId]] });
       const held = Boolean((info.body as { model?: { legalHold?: boolean } })?.model?.legalHold);
       if (held) await fireConsole(portal, 'Calls', /^Update Legal Hold/, { params: [['callId', f.callId]] });
       return { ok: !held, detail: held ? 'legalHold was ON — toggled back from site A' : 'legalHold unchanged' };
@@ -539,7 +539,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
         if (hit) await fireConsole(portal, 'Group Management', /^Delete Agent Group/, { params: [['agentGroupId', String(hit.id)]] });
       },
     },
-    attempt: { verb: 'add', operation: /^Create Agent Group/, body: f => ({ customerId: KNOWN.customerId, name: f.marker, isActive: true, agentJson: JSON.stringify([f.agentId]) }) },
+    attempt: { verb: 'add', operation: /^Create Agent Group/, body: f => ({ customerId: TARGET_CUSTOMER_ID, name: f.marker, isActive: true, agentJson: JSON.stringify([f.agentId]) }) },
   },
   'group-mgmt/update-agent-group': {
     fixture: {
@@ -547,10 +547,10 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       run: async portal => {
         const agents = await fireConsole(portal, 'Agent Management', /^List Agents/, { body: LIST_BODY_100 });
         const name = `xt-grpupd-${Date.now()}`;
-        await fireConsole(portal, 'Group Management', /^Create Agent Group/, { body: { customerId: KNOWN.customerId, name, isActive: true, agentJson: JSON.stringify([String(rowsOf(agents.body)[0]?.id ?? '')]) } });
+        await fireConsole(portal, 'Group Management', /^Create Agent Group/, { body: { customerId: TARGET_CUSTOMER_ID, name, isActive: true, agentJson: JSON.stringify([String(rowsOf(agents.body)[0]?.id ?? '')]) } });
         const list = await fireConsole(portal, 'Group Management', /^List Agent Groups/, { body: LIST_BODY_100 });
         const g = rowsOf(list.body).find(x => String(x.name) === name) ?? {};
-        return { groupId: String(g.id ?? ''), name, customerId: String(g.customerId ?? KNOWN.customerId), agentJson: String(g.agentJson ?? '[]') };
+        return { groupId: String(g.id ?? ''), name, customerId: String(g.customerId ?? TARGET_CUSTOMER_ID), agentJson: String(g.agentJson ?? '[]') };
       },
       remove: async (portal, f) => { if (f.groupId) await fireConsole(portal, 'Group Management', /^Delete Agent Group/, { params: [['agentGroupId', f.groupId]] }); },
     },
@@ -563,7 +563,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       run: async portal => {
         const agents = await fireConsole(portal, 'Agent Management', /^List Agents/, { body: LIST_BODY_100 });
         const name = `xt-grpdel-${Date.now()}`;
-        await fireConsole(portal, 'Group Management', /^Create Agent Group/, { body: { customerId: KNOWN.customerId, name, isActive: true, agentJson: JSON.stringify([String(rowsOf(agents.body)[0]?.id ?? '')]) } });
+        await fireConsole(portal, 'Group Management', /^Create Agent Group/, { body: { customerId: TARGET_CUSTOMER_ID, name, isActive: true, agentJson: JSON.stringify([String(rowsOf(agents.body)[0]?.id ?? '')]) } });
         const list = await fireConsole(portal, 'Group Management', /^List Agent Groups/, { body: LIST_BODY_100 });
         return { groupId: String(rowsOf(list.body).find(x => String(x.name) === name)?.id ?? '') };
       },
@@ -615,14 +615,14 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
         if (hit) await fireConsole(portal, 'Notifications', /^Delete Notification Rule/, { params: [['id', String(hit.id)]] });
       },
     },
-    attempt: { verb: 'add', operation: /^Add Notification Rule/, body: f => ruleDto(f.marker, [f.siteAId]) },
+    attempt: { verb: 'add', operation: /^Create Notification Rule/, body: f => ruleDto(f.marker, [f.siteAId]) },
   },
   'notifications/update-notification-rule': {
     fixture: {
       mode: 'create',
       run: async (portal, siteAId) => {
         const name = `xt-ruleupd-${Date.now()}`;
-        const created = await fireConsole(portal, 'Notifications', /^Add Notification Rule/, { body: ruleDto(name, [siteAId]) });
+        const created = await fireConsole(portal, 'Notifications', /^Create Notification Rule/, { body: ruleDto(name, [siteAId]) });
         return { ruleId: String(created.body ?? ''), name, siteAId };
       },
       remove: async (portal, f) => { if (f.ruleId) await fireConsole(portal, 'Notifications', /^Delete Notification Rule/, { params: [['id', f.ruleId]] }); },
@@ -634,7 +634,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       mode: 'create',
       run: async (portal, siteAId) => {
         const name = `xt-ruledel-${Date.now()}`;
-        const created = await fireConsole(portal, 'Notifications', /^Add Notification Rule/, { body: ruleDto(name, [siteAId]) });
+        const created = await fireConsole(portal, 'Notifications', /^Create Notification Rule/, { body: ruleDto(name, [siteAId]) });
         return { ruleId: String(created.body ?? '') };
       },
       remove: async (portal, f) => { if (f.ruleId) await fireConsole(portal, 'Notifications', /^Delete Notification Rule/, { params: [['id', f.ruleId]] }).catch(() => {}); },
@@ -704,7 +704,7 @@ export const WRITE_PLANS: Record<string, WritePlan> = {
       remove: async () => {},
     },
     // ADO 37614 — settings/custom-roles/permissions; `access` is a JSON string
-    attempt: { verb: 'update', operation: /^Update Custom Role/, body: f => ({ id: f.roleId, name: `${f.name} B`, access: '[]', locked: false, customerId: KNOWN.customerId }) },
+    attempt: { verb: 'update', operation: /^Update Custom Role/, body: f => ({ id: f.roleId, name: `${f.name} B`, access: '[]', locked: false, customerId: TARGET_CUSTOMER_ID }) },
     onSuccess: 'suspected',
   },
 

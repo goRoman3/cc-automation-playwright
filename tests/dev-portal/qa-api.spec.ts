@@ -3,6 +3,7 @@ import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage'
 import {
   API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS,
   MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson, firstOwnSiteCallId,
+  requireQaForm, noSeedDataReason,
 } from './_helpers';
 
 /**
@@ -30,27 +31,23 @@ test.describe('Developer Portal (staging) — QA API', () => {
   test.beforeEach(async ({ page, loginPage }) => { await stagingLogin(page, loginPage); });
   test.afterEach(async ({ page }) => { await closeExtraTabs(page); });
 
-  /** Opens Get Available QAs and returns the first non-archived form's id. */
-  async function firstAvailableFormId(portal: DeveloperPortalPage, callId: string): Promise<number> {
-    const listOp = await portal.openOperation('QA', /^Get Available QAs/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listOp.openConsole();
-    await listOp.selectSubscriptionKey(API_KEY_OPTION);
-    await listOp.addParameter('callId', callId);
-    const { status, body: forms } = await listOp.send();
-    expect(status).toBe(200);
-    const form = (forms as Array<{ id: number; archived: boolean }>).find(f => !f.archived);
-    expect(form, 'Expected at least one non-archived QA form available for this call').toBeTruthy();
-    return form!.id;
+  const NO_QA_FORM_REASON = noSeedDataReason(
+    'List Available QAs returned no non-archived form for this call (QA forms are configured outside this API, not creatable by the test itself).',
+  );
+
+  /** `requireQaForm()`'s id, or `undefined` if none exists. Kept as a thin wrapper — every call site here only needs the id. */
+  async function firstAvailableFormId(portal: DeveloperPortalPage, callId: string): Promise<number | undefined> {
+    return (await requireQaForm(portal, callId))?.id;
   }
 
-  test('Get Available QAs → Get QA — 200, using a live-discovered form id', async ({ homePage }) => {
+  test('List Available QAs → Preview QA — 200, using a live-discovered form id', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    // Live per-run — NOT the site-bound `KNOWN.callId` constant.
+    // Live per-run — NOT a hardcoded tenant's callId.
     const callId = await firstOwnSiteCallId(portal);
     const formId = await firstAvailableFormId(portal, callId);
+    test.skip(formId === undefined, NO_QA_FORM_REASON);
 
-    const getOp = await portal.openOperation('QA', /^Get QA/);
+    const getOp = await portal.openOperation('QA', /^Preview QA/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await getOp.openConsole();
     await getOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -59,9 +56,9 @@ test.describe('Developer Portal (staging) — QA API', () => {
     expect(status).toBe(200);
   });
 
-  test('Get All QAs — 200', async ({ homePage }) => {
+  test('List All QAs — 200', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const op = await portal.openOperation('QA', /^Get All QAs/);
+    const op = await portal.openOperation('QA', /^List All QAs/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -81,12 +78,13 @@ test.describe('Developer Portal (staging) — QA API', () => {
     expect(status).toBe(200);
   });
 
-  test('Get AQA Phrases — 200, callId + formId both required despite formId being documented optional', async ({ homePage }) => {
+  test('Preview AQA Phrases — 200, callId + formId both required despite formId being documented optional', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const callId = await firstOwnSiteCallId(portal);
     const formId = await firstAvailableFormId(portal, callId);
+    test.skip(formId === undefined, NO_QA_FORM_REASON);
 
-    const op = await portal.openOperation('QA', /^Get AQA Phrases/);
+    const op = await portal.openOperation('QA', /^Preview AQA Phrases/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -100,6 +98,7 @@ test.describe('Developer Portal (staging) — QA API', () => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const callId = await firstOwnSiteCallId(portal);
     const formId = await firstAvailableFormId(portal, callId);
+    test.skip(formId === undefined, NO_QA_FORM_REASON);
 
     const saveOp = await portal.openOperation('QA', /^Save completed QAs/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
@@ -108,7 +107,7 @@ test.describe('Developer Portal (staging) — QA API', () => {
     const { status } = await sendJson(saveOp, portal.raw, { id: formId, callId, questions: [], sections: [] });
     expect(status).toBe(201);
 
-    const getCallOp = await portal.openOperation('Calls', /^Get Call Info/);
+    const getCallOp = await portal.openOperation('Calls', /^Preview Call Info/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await getCallOp.openConsole();
     await getCallOp.selectSubscriptionKey(API_KEY_OPTION);
@@ -121,6 +120,7 @@ test.describe('Developer Portal (staging) — QA API', () => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const callId = await firstOwnSiteCallId(portal);
     const formId = await firstAvailableFormId(portal, callId);
+    test.skip(formId === undefined, NO_QA_FORM_REASON);
 
     const op = await portal.openOperation('QA', /^Email QA/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);

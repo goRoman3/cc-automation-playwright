@@ -1,6 +1,6 @@
 import type { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import {
-  API_KEY_OPTION, KNOWN, LIST_BODY, LIST_BODY_100, openConsole, sendJson,
+  API_KEY_OPTION, TARGET_CUSTOMER_ID, LIST_BODY, LIST_BODY_100, openConsole, sendJson,
   currentSiteId, firstOwnSiteCall, agentDto, ruleDto, alertDto,
 } from './_helpers';
 import type { NegFieldSpec } from './_negative-fields';
@@ -20,7 +20,7 @@ import type { NegFieldSpec } from './_negative-fields';
  *  - every Update / Delete op — omitting a field from an update risks a
  *    partial wipe (the Update Agent Group full-replace bug is exactly this);
  *  - Manual Redaction (standing "do not fire" hold + the endpoint hangs);
- *  - Add User (control creates a real user + invitation email, and Delete
+ *  - Create User (control creates a real user + invitation email, and Delete
  *    User's console is broken — can't clean up; covered by the older
  *    `negative-required-fields-staging.spec.ts` instead);
  *  - Update Retention Policy (omitting `expirationDays` could null retention);
@@ -65,14 +65,15 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
     cleanup: async (portal, c) => { await fire(portal, 'Extension Management', /^Delete Extension/, { params: [['extensionId', c.extensionId], ['isArchive', 'false']] }); },
   },
 
-  // ── Site Management / Add Site ──────────────────────────────────────────
+  // ── Site Management / Create Site (catalogue title as of 2026-09-04; was
+  // "Add Site" — id kept stable as a join key with boundary-fields-catalog.ts) ──
   {
-    id: 'site-mgmt/add-site', group: 'Site Management', operation: 'Add Site',
-    match: /^Add Site/,
+    id: 'site-mgmt/add-site', group: 'Site Management', operation: 'Create Site',
+    match: /^Create Site/,
     validBody: () => ({ name: `AQAnegsite${stamp()}` }),
     requiredFields: [{ name: 'name', in: 'body', expect: '400' }],  // CONFIRMED
     identify: b => {
-      const s = Array.isArray(b) ? b[0] : b;  // Add Site returns a single-element array of SiteDto (PascalCase Id)
+      const s = Array.isArray(b) ? b[0] : b;  // Create Site returns a single-element array of SiteDto (PascalCase Id)
       const id = String((s as { Id?: string; id?: string })?.Id ?? (s as { id?: string })?.id ?? '');
       return id ? { siteId: id } : null;
     },
@@ -80,10 +81,11 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
     cleanupCaveat: 'Delete Site path-param name assumed "siteId" — if wrong, the disposable site is left (CC Test 1 has hundreds; harmless)',
   },
 
-  // ── Tag Management / Add Tag ───────────────────────────────────────────
+  // ── Tag Management / Create Tag (catalogue title as of 2026-09-04; was
+  // "Add Tag" — id kept stable as a join key with boundary-fields-catalog.ts) ──
   {
-    id: 'tag-mgmt/add-tag', group: 'Tag Management', operation: 'Add Tag',
-    match: /^Add Tag/,
+    id: 'tag-mgmt/add-tag', group: 'Tag Management', operation: 'Create Tag',
+    match: /^Create Tag/,
     // alphanumeric + spaces only (CONTRACT-update-tag-name-validation) — no hyphens
     validBody: () => ({ name: `AQAnegtag${stamp()}` }),
     requiredFields: [{ name: 'name', in: 'body', expect: '400' }],  // CONFIRMED
@@ -120,6 +122,13 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
     requiredFields: [
       // CONFIRMED (evidence P1-NEGATIVE-500S + negative-required-fields-staging): 500 EF save error, not 400
       { name: 'name', in: 'body', expect: 'known-bug-500', note: 'BUG-negative-missing-field-500 — "An error occurred while saving the entity changes" (EF) instead of a 400' },
+      // CONFIRMED not-enforced (2026-09-04 APIM catalogue recon, cross-referenced
+      // against _apim-schema.ts): the catalogue documents `access` as required
+      // alongside `name`, but the control body above (`{ name }`, no `access` key
+      // at all) has always succeeded — direct evidence the field isn't actually
+      // enforced, same doc-vs-reality gap class as the CallID query-vs-template
+      // finding on ADO #38083.
+      { name: 'access', in: 'body', expect: 'not-enforced', note: 'documented required by APIM but the control body (name-only, no access key) already succeeds — not actually enforced' },
     ],
     identify: b => {
       const id = String((b as { id?: string })?.id ?? '');
@@ -137,7 +146,7 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
       const agents = await fire(portal, 'Agent Management', /^List Agents/, { body: LIST_BODY_100 });
       return { agentId: String(rowsOf(agents.body)[0]?.id ?? ''), name: `AQA neg grp ${stamp()}` };
     },
-    validBody: r => ({ customerId: KNOWN.customerId, name: r.name, isActive: true, agentJson: JSON.stringify([r.agentId]) }),
+    validBody: r => ({ customerId: TARGET_CUSTOMER_ID, name: r.name, isActive: true, agentJson: JSON.stringify([r.agentId]) }),
     requiredFields: [
       { name: 'name', in: 'body', expect: 'hypothesis-400' },
       { name: 'customerId', in: 'body', expect: 'hypothesis-400' },
@@ -163,10 +172,18 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
     resolve: async portal => ({ siteId: await currentSiteId(portal) }),
     validBody: r => agentDto('AQA', `neg ${stamp()}`, r.siteId),
     requiredFields: [
-      // suite-rework doc: the reduced required set was NEVER established for the full agent DTO.
-      { name: 'firstName', in: 'body', expect: 'needs-schema-confirmation' },
-      { name: 'lastName', in: 'body', expect: 'needs-schema-confirmation' },
-      { name: 'siteId', in: 'body', expect: 'needs-schema-confirmation' },
+      // suite-rework doc: the reduced required set was NEVER established live for
+      // the full agent DTO. Upgraded from needs-schema-confirmation to
+      // hypothesis-400 for the 5 fields the 2026-09-04 APIM catalogue recon
+      // documents as required (_apim-schema.ts) — still unconfirmed live, so
+      // still a soft assertion, just no longer a pure guess.
+      { name: 'firstName', in: 'body', expect: 'hypothesis-400' },
+      { name: 'lastName', in: 'body', expect: 'hypothesis-400' },
+      { name: 'siteId', in: 'body', expect: 'hypothesis-400' },
+      { name: 'groups', in: 'body', expect: 'hypothesis-400', note: 'schema-required; not previously probed' },
+      { name: 'extensions', in: 'body', expect: 'hypothesis-400', note: 'schema-required; not previously probed' },
+      // customerId is NOT marked required in the catalogue — left unconfirmed
+      // rather than guessed either way.
       { name: 'customerId', in: 'body', expect: 'needs-schema-confirmation' },
     ],
     identify: b => {
@@ -199,10 +216,12 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
     cleanup: async (portal, c) => { await fire(portal, 'Agent Management', /^Delete Agent Extension/, { params: [['id', c.mappingId]] }); },
   },
 
-  // ── Notifications / Add Notification Rule ─────────────────────────
+  // ── Notifications / Create Notification Rule (catalogue title as of
+  // 2026-09-04; was "Add Notification Rule" — see negative-fields-catalog id
+  // below, kept stable as a join key with boundary-fields-catalog.ts) ──────
   {
-    id: 'notifications/add-notification-rule', group: 'Notifications', operation: 'Add Notification Rule',
-    match: /^Add Notification Rule/,
+    id: 'notifications/add-notification-rule', group: 'Notifications', operation: 'Create Notification Rule',
+    match: /^Create Notification Rule/,
     resolve: async portal => ({ siteId: await currentSiteId(portal) }),
     validBody: r => ruleDto(`AQA neg rule ${stamp()}`, [r.siteId]),
     requiredFields: [
@@ -212,7 +231,7 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
       { name: 'siteIds', in: 'body', expect: 'needs-schema-confirmation' },
     ],
     identify: b => {
-      const id = String(b ?? '');  // Add Notification Rule returns the id as a bare string
+      const id = String(b ?? '');  // Create Notification Rule returns the id as a bare string
       return id && id !== '[object Object]' ? { ruleId: id } : null;
     },
     cleanup: async (portal, c) => { await fire(portal, 'Notifications', /^Delete Notification Rule/, { params: [['id', c.ruleId]] }); },
@@ -224,12 +243,22 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
     match: /^Upsert Alert Configuration/,
     validBody: () => alertDto(`AQA neg alert ${stamp()}`, null),
     requiredFields: [
-      // full-object body — reduced required set never established (suite-rework doc)
+      // full-object body — reduced required set never established live (suite-rework doc).
+      // name/windowType/windowValue are NOT marked required in the 2026-09-04
+      // APIM catalogue recon (_apim-schema.ts) — left unconfirmed rather than
+      // guessed either way.
       { name: 'name', in: 'body', expect: 'needs-schema-confirmation' },
-      { name: 'notificationTypeId', in: 'body', expect: 'needs-schema-confirmation' },
       { name: 'windowType', in: 'body', expect: 'needs-schema-confirmation' },
       { name: 'windowValue', in: 'body', expect: 'needs-schema-confirmation' },
-      { name: 'triggers', in: 'body', expect: 'needs-schema-confirmation' },
+      // Schema-required (upgraded from needs-schema-confirmation) — all three
+      // are part of the already-live-verified DTO above, just never individually
+      // probed. `notificationTypeId` vs the catalogue's documented
+      // `notificationTypeID` casing: same field, catalogue casing looks like a
+      // doc typo (every other confirmed request in this suite uses camelCase).
+      { name: 'notificationTypeId', in: 'body', expect: 'hypothesis-400', note: 'schema-required (documented as notificationTypeID — casing looks like a doc typo)' },
+      { name: 'triggers', in: 'body', expect: 'hypothesis-400', note: 'schema-required; not previously probed' },
+      { name: 'id', in: 'body', expect: 'hypothesis-400', note: 'schema-required; probes a fully-absent id key, distinct from the create-path explicit id:null already covered by the control' },
+      { name: 'emailAddresses', in: 'body', expect: 'hypothesis-400', note: 'schema-required; not previously probed' },
     ],
     identify: b => {
       const m = /Notification Config '(\d+)'/.exec(String((b as { configResult?: string })?.configResult ?? ''));
@@ -260,7 +289,7 @@ export const NEG_FIELD_SPECS: NegFieldSpec[] = [
 
 /** Ops deliberately NOT in the negative-field matrix — named skips in the spec. */
 export const EXCLUDED_FROM_NEG_MATRIX: Array<{ group: string; operation: string; reason: string }> = [
-  { group: 'User Management', operation: 'Add User', reason: 'control case creates a real user + sends a real invitation email, and Delete User\'s console is broken (BUG-delete-user-send-inert) — can\'t clean up. Covered by negative-required-fields-staging.spec.ts.' },
+  { group: 'User Management', operation: 'Create User', reason: 'control case creates a real user + sends a real invitation email, and Delete User\'s console is broken (BUG-delete-user-send-inert) — can\'t clean up. Covered by negative-required-fields-staging.spec.ts.' },
   { group: 'Manual Redaction', operation: 'Submit Call Redaction Request', reason: 'standing "do not fire Manual Redaction" hold + the endpoint hangs with no response (MASTER §12). Never fired.' },
   { group: 'Retention Management', operation: 'Update Retention Policy', reason: 'omitting expirationDays from an update could null the site\'s retention — too dangerous for a negative probe.' },
   { group: 'General Settings', operation: 'Update Company Settings', reason: 'customer-level settings update — omitting a field could reset real config; no disposable form.' },

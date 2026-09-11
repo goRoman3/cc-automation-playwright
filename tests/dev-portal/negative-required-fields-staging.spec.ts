@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import type { ApiOperationPage } from '../../pages/dev-portal/ApiOperationPage';
-import { STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS } from './_helpers';
+import { STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, currentSiteId, firstOwnSiteCallId } from './_helpers';
 
 /**
  * Negative validation checks: for each operation with a known, confirmed
@@ -23,13 +23,13 @@ import { STAGING_APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, API_KEY_OPTION, SCHEMA_LO
  * need their own live field-by-field exploration first, which this batch
  * didn't budget for.
  *
- * **2026-08-30**: the create-from-body cases here (Add Tag / Add Site /
+ * **2026-08-30**: the create-from-body cases here (Create Tag / Create Site /
  * Create Extension / Add IP Whitelist / Create Custom Role / Add Call Note)
  * are now covered systematically — with a per-op CONTROL case (full valid
  * body → success) and `finally` cleanup — by the declarative
  * `negative-required-fields-matrix.spec.ts` (`_negative-fields.ts` engine +
  * `negative-fields-catalog.ts`). This file is retained for the two ops the
- * matrix EXCLUDES: **Add User** (control creates a real user + invitation
+ * matrix EXCLUDES: **Create User** (control creates a real user + invitation
  * email, and Delete User's console is broken) and **Manual Redaction** (the
  * hold + endpoint hang). Not run live either — see `tests/dev-portal/UNVERIFIED.md`.
  */
@@ -107,9 +107,9 @@ test.describe('Development portal (staging) — negative validation: missing req
   });
 
   test.describe('Tag Management', () => {
-    test('Add Tag — rejects (400) when name is omitted', async ({ homePage }) => {
+    test('Create Tag — rejects (400) when name is omitted', async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
-      const op = await portal.openOperation('Tag Management', /^Add Tag/);
+      const op = await portal.openOperation('Tag Management', /^Create Tag/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
       await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -119,9 +119,9 @@ test.describe('Development portal (staging) — negative validation: missing req
   });
 
   test.describe('Site Management', () => {
-    test('Add Site — rejects (400) when name is omitted', async ({ homePage }) => {
+    test('Create Site — rejects (400) when name is omitted', async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
-      const op = await portal.openOperation('Site Management', /^Add Site/);
+      const op = await portal.openOperation('Site Management', /^Create Site/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
       await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -148,7 +148,7 @@ test.describe('Development portal (staging) — negative validation: missing req
   test.describe('Extension Management', () => {
     test('Create Extension — rejects (400) when name or siteId is omitted', async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
-      const siteId = '8cc22cd2-a4b7-46c5-b907-9050e110dac5'; // UA team recording — the key's own site
+      const siteId = await currentSiteId(portal); // live-resolved — the key's CURRENT site, not a fixed tenant's
       const op = await portal.openOperation('Extension Management', /^Create Extension/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
@@ -174,13 +174,13 @@ test.describe('Development portal (staging) — negative validation: missing req
     // here as a hypothesis carried over from the happy-path body — not yet
     // individually confirmed omitted one-at-a-time before this test existed;
     // this run is what confirms (or corrects) that.
-    test('Add User — most required fields rejected when omitted; qcRId is not enforced', async ({ homePage }) => {
-      // ⚠️ Same throwaway-address convention as the happy-path Add User test
+    test('Create User — most required fields rejected when omitted; qcRId is not enforced', async ({ homePage }) => {
+      // ⚠️ Same throwaway-address convention as the happy-path Create User test
       // — an unenforced field still creates a real user and sends a real
       // invitation email. Never run against a real address.
       const portal = await DeveloperPortalPage.openFrom(homePage);
       const email = `aqa-negative-test+${Date.now()}@callcabinet.com`;
-      const op = await portal.openOperation('User Management', /^Add User/);
+      const op = await portal.openOperation('User Management', /^Create User/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
       await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -222,7 +222,7 @@ test.describe('Development portal (staging) — negative validation: missing req
     // neither is validated nor accepted, both hang the backend entirely.
     test('Submit Call Redaction Request — callId/requestText rejected when omitted; entityTypeId is not enforced', async ({ homePage }) => {
       const portal = await DeveloperPortalPage.openFrom(homePage);
-      const callId = 'd71ac345-86a0-f111-9b33-6045bded66d5'; // UA team recording — known-good for this key
+      const callId = await firstOwnSiteCallId(portal); // live-resolved — a real call on the key's CURRENT site, not a fixed tenant's
       const op = await portal.openOperation('Manual Redaction', /^Submit Call Redaction Request/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();
@@ -260,7 +260,7 @@ test.describe('Development portal (staging) — negative validation: missing req
     for (const missingField of ['startMilliseconds', 'endMilliseconds'] as const) {
       test(`KNOWN BUG — Submit Call Redaction Request hangs indefinitely (no response) when ${missingField} is omitted`, async ({ homePage }) => {
         const portal = await DeveloperPortalPage.openFrom(homePage);
-        const callId = 'd71ac345-86a0-f111-9b33-6045bded66d5'; // UA team recording — known-good for this key
+        const callId = await firstOwnSiteCallId(portal); // live-resolved — a real call on the key's CURRENT site, not a fixed tenant's
         const op = await portal.openOperation('Manual Redaction', /^Submit Call Redaction Request/);
         await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
         await op.openConsole();
@@ -285,7 +285,7 @@ test.describe('Development portal (staging) — negative validation: missing req
       // that would need removing the parameter too, which isn't covered by
       // this loop-over-body-keys helper. Left as a follow-up.
       const portal = await DeveloperPortalPage.openFrom(homePage);
-      const callId = 'd71ac345-86a0-f111-9b33-6045bded66d5'; // UA team recording — known-good for this key
+      const callId = await firstOwnSiteCallId(portal); // live-resolved — a real call on the key's CURRENT site, not a fixed tenant's
       const op = await portal.openOperation('Calls', /^Add Call Note/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await op.openConsole();

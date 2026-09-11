@@ -1,8 +1,9 @@
 import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import {
-  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, KNOWN, LIST_BODY_100,
-  MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson, openConsole,
+  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, TARGET_CUSTOMER_ID, LIST_BODY_100,
+  MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson, openConsole, currentSiteId,
+  requireUnassignedAgent, requireUnassignedExtension, noSeedDataReason, ZERO_GUID,
 } from './_helpers';
 
 /**
@@ -102,29 +103,22 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
     mEmail: null, assignedSupervisor: null, assignedExtension: false,
     groups: [] as string[], groupsDisplayName: '', extensions: [] as string[],
     extensionsDisplayName: null, extensionsJson: null, groupsJson: null, notes: '',
-    customerId: KNOWN.customerId, ...extra,
+    customerId: TARGET_CUSTOMER_ID, ...extra,
   });
 
-  /**
-   * List Agents → first agent's `{id, siteId}`. `siteId` here is always the
-   * key's *currently active* site (whatever it happens to be switched to),
-   * not the possibly-stale `KNOWN.siteId` — see `agentDto()` above for why
-   * that matters.
-   */
-  async function firstAgent(portal: DeveloperPortalPage): Promise<{ id: string; siteId: string }> {
-    const listOp = await portal.openOperation('Agent Management', /^List Agents/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listOp.openConsole();
-    await listOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { body: agents } = await sendJson(listOp, portal.raw, LIST_BODY_100);
-    const agent = (agents as Array<{ id: string; siteId: string }>)[0];
-    expect(agent, 'Expected at least one agent in this account').toBeTruthy();
-    return agent!;
-  }
+  // `firstAgent()` used to live here as a local copy of `_helpers.ts`'s
+  // `requireAgent()`. No consumer left in this file as of 2026-09-04 — the
+  // two tests that used it now create their own disposable agent instead
+  // (see "List Agent Extensions" / "Preview Agent" below); `requireAgent()`
+  // itself stays in `_helpers.ts` for `group-management-api.spec.ts`, which
+  // still needs to borrow an existing agent's id (a group can't be created
+  // without pointing at *some* agent, disposable or not — creating a whole
+  // extra throwaway agent just to seed a group test wasn't judged worth the
+  // added complexity here, but is a reasonable future improvement).
 
-  test('Get Supervisors — 200 (no-param GET)', async ({ homePage }) => {
+  test('List Supervisors — 200 (no-param GET)', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const op = await portal.openOperation('Agent Management', /^Get Supervisors/);
+    const op = await portal.openOperation('Agent Management', /^List Supervisors/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
     await op.openConsole();
     await op.selectSubscriptionKey(API_KEY_OPTION);
@@ -132,33 +126,61 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
     expect(status).toBe(200);
   });
 
-  test('Get Agent Extensions — 200 (agentId + siteId params, { pattern } body)', async ({ homePage }) => {
+  test('List Agent Extensions — 200 (agentId + siteId params, { pattern } body)', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const { id: agentId, siteId } = await firstAgent(portal);
-
-    const op = await portal.openOperation('Agent Management', /^Get Agent Extensions/);
+    // Self-contained (2026-09-04) — was a `requireAgent()` seed-dependent
+    // guard; converted since this file's own "Create Agent → Delete Agent"
+    // test already proves the full lifecycle. Creates its own disposable
+    // agent instead of depending on one existing.
+    const siteId = await currentSiteId(portal);
+    const createOp = await portal.openOperation('Agent Management', /^Create Agent \(/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await op.openConsole();
-    await op.selectSubscriptionKey(API_KEY_OPTION);
-    await op.addParameter('agentId', agentId);
-    await op.addParameter('siteId', siteId);
-    const { status } = await sendJson(op, portal.raw, { pattern: '' });
-    expect(status).toBe(200);
+    await createOp.openConsole();
+    await createOp.selectSubscriptionKey(API_KEY_OPTION);
+    const { status: createStatus, body: created } = await sendJson(createOp, portal.raw, agentDto('AQA', `listext ${Date.now()}`, siteId));
+    expect(createStatus).toBe(200);
+    const agentId = (created as { id: string }).id;
+
+    try {
+      const op = await portal.openOperation('Agent Management', /^List Agent Extensions/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await op.openConsole();
+      await op.selectSubscriptionKey(API_KEY_OPTION);
+      await op.addParameter('agentId', agentId);
+      await op.addParameter('siteId', siteId);
+      const { status } = await sendJson(op, portal.raw, { pattern: '' });
+      expect(status).toBe(200);
+    } finally {
+      if (agentId) await tryDeleteAgent(portal, agentId);
+    }
   });
 
-  test('Get Agent — 200 for a live-discovered agent id', async ({ homePage }) => {
+  test('Preview Agent — 200 for a live-discovered agent id', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const { id: agentId } = await firstAgent(portal);
-
-    const getOp = await portal.openOperation('Agent Management', /^Get Agent \(/);
+    // Self-contained (2026-09-04) — see "List Agent Extensions" above for
+    // why this no longer depends on a pre-existing agent.
+    const siteId = await currentSiteId(portal);
+    const createOp = await portal.openOperation('Agent Management', /^Create Agent \(/);
     await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await getOp.openConsole();
-    await getOp.selectSubscriptionKey(API_KEY_OPTION);
-    await getOp.addParameter('agentId', agentId);
-    const { status, body } = await getOp.send();
-    expect(status).toBe(200);
-    // ADO 37326: response carries firstName/lastName/email/site (not a bare `id`).
-    expect(typeof (body as { firstName: string }).firstName).toBe('string');
+    await createOp.openConsole();
+    await createOp.selectSubscriptionKey(API_KEY_OPTION);
+    const { status: createStatus, body: created } = await sendJson(createOp, portal.raw, agentDto('AQA', `preview ${Date.now()}`, siteId));
+    expect(createStatus).toBe(200);
+    const agentId = (created as { id: string }).id;
+
+    try {
+      const getOp = await portal.openOperation('Agent Management', /^Preview Agent \(/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await getOp.openConsole();
+      await getOp.selectSubscriptionKey(API_KEY_OPTION);
+      await getOp.addParameter('agentId', agentId);
+      const { status, body } = await getOp.send();
+      expect(status).toBe(200);
+      // ADO 37326: response carries firstName/lastName/email/site (not a bare `id`).
+      expect(typeof (body as { firstName: string }).firstName).toBe('string');
+    } finally {
+      if (agentId) await tryDeleteAgent(portal, agentId);
+    }
   });
 
   /** Best-effort cleanup — deletes an agent without asserting (for `finally`). */
@@ -178,7 +200,9 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
   test('Create Agent → Delete Agent — 204 (Delete asserted independently of Update Agent)', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const stamp = Date.now();
-    const { siteId } = await firstAgent(portal);
+    // Self-contained — only needs a valid site to create the agent on, not a
+    // pre-existing agent (Roman_QA_TEST may have neither).
+    const siteId = await currentSiteId(portal);
     let agentId: string | undefined;
 
     try {
@@ -191,6 +215,18 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
       agentId = (created as { id: string }).id;
       expect(agentId).toBeTruthy();
 
+      // Verify by a SEPARATE request that Create actually persisted the record.
+      const listAfterCreateOp = await portal.openOperation('Agent Management', /^List Agents/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listAfterCreateOp.openConsole();
+      await listAfterCreateOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listAfterCreateStatus, body: agentsAfterCreate } = await sendJson(listAfterCreateOp, portal.raw, LIST_BODY_100);
+      expect(listAfterCreateStatus).toBe(200);
+      expect(
+        (agentsAfterCreate as Array<{ id: string }>).some(a => a.id === agentId),
+        'Expected the newly created agent to appear in List Agents',
+      ).toBe(true);
+
       const deleteOp = await portal.openOperation('Agent Management', /^Delete Agent \(/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await deleteOp.openConsole();
@@ -198,7 +234,20 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
       await deleteOp.addParameter('agentId', agentId);
       const { status: deleteStatus } = await deleteOp.send();
       expect(deleteStatus).toBe(204); // ADO 37320
+      const deletedAgentId = agentId;
       agentId = undefined; // deleted — nothing to clean up
+
+      // Verify by a SEPARATE request that Delete actually removed the record.
+      const listAfterDeleteOp = await portal.openOperation('Agent Management', /^List Agents/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listAfterDeleteOp.openConsole();
+      await listAfterDeleteOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listAfterDeleteStatus, body: agentsAfterDelete } = await sendJson(listAfterDeleteOp, portal.raw, LIST_BODY_100);
+      expect(listAfterDeleteStatus).toBe(200);
+      expect(
+        (agentsAfterDelete as Array<{ id: string }>).some(a => a.id === deletedAgentId),
+        'Expected the deleted agent to no longer appear in List Agents',
+      ).toBe(false);
     } finally {
       if (agentId) await tryDeleteAgent(portal, agentId);
     }
@@ -207,9 +256,9 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
   test('Update Agent — KNOWN BUG regression: 400 "Configured site does not contain selected agent or extension" despite Create + Get confirming the site', async ({ homePage }, testInfo) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const stamp = Date.now();
-    // `siteId` is read live off an existing agent, so it is unambiguously
-    // the key's *current* site — not the possibly-stale `KNOWN.siteId`.
-    const { siteId } = await firstAgent(portal);
+    // Self-contained — only needs a valid site to create the agent on, not a
+    // pre-existing agent (Roman_QA_TEST may have neither).
+    const siteId = await currentSiteId(portal);
     let agentId: string | undefined;
 
     try {
@@ -227,13 +276,13 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
         (created as { siteId?: string; site?: string }).siteId ?? (created as { site?: string }).site;
 
       // 2) Get Agent immediately, read the site back.
-      const getOp = await portal.openOperation('Agent Management', /^Get Agent \(/);
+      const getOp = await portal.openOperation('Agent Management', /^Preview Agent \(/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
       await getOp.openConsole();
       await getOp.selectSubscriptionKey(API_KEY_OPTION);
       await getOp.addParameter('agentId', agentId!);
       const { status: getStatus, body: fetched } = await getOp.send();
-      expect(getStatus, 'Get Agent should return 200').toBe(200);
+      expect(getStatus, 'Preview Agent should return 200').toBe(200);
       const getRespSiteId =
         (fetched as { siteId?: string; site?: string }).siteId ?? (fetched as { site?: string }).site;
 
@@ -271,7 +320,7 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
       // either of these fails, the finding is different (Create ignoring the
       // body `siteId`, or Get returning another site) — not the Update bug.
       expect(createRespSiteId, 'Create response siteId should equal the sent siteId').toBe(createReqBody.siteId);
-      expect(getRespSiteId, 'Get Agent siteId should equal the created siteId').toBe(createRespSiteId);
+      expect(getRespSiteId, 'Preview Agent siteId should equal the created siteId').toBe(createRespSiteId);
 
       // The bug: Update still 400s with the site-scoping message even though
       // Create + Get both place the agent on this exact site. If this ever
@@ -287,54 +336,84 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
   test('Batch Delete Agents — deletes two throwaway agents this test creates', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
     const stamp = Date.now();
-    const { siteId } = await firstAgent(portal);
+    // Self-contained — only needs a valid site to create the agents on, not
+    // a pre-existing agent (Roman_QA_TEST may have neither).
+    const siteId = await currentSiteId(portal);
     const ids: string[] = [];
+    let batchDeleteSucceeded = false;
 
-    for (const suffix of ['a', 'b']) {
-      const addOp = await portal.openOperation('Agent Management', /^Create Agent \(/);
+    try {
+      for (const suffix of ['a', 'b']) {
+        const addOp = await portal.openOperation('Agent Management', /^Create Agent \(/);
+        await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+        await addOp.openConsole();
+        await addOp.selectSubscriptionKey(API_KEY_OPTION);
+        const { status, body } = await sendJson(addOp, portal.raw, agentDto('AQA', `batch ${stamp} ${suffix}`, siteId));
+        expect(status).toBe(200);
+        ids.push((body as { id: string }).id);
+      }
+
+      // Verify by a SEPARATE request that both Creates actually persisted the records.
+      const listAfterCreateOp = await portal.openOperation('Agent Management', /^List Agents/);
       await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-      await addOp.openConsole();
-      await addOp.selectSubscriptionKey(API_KEY_OPTION);
-      const { status, body } = await sendJson(addOp, portal.raw, agentDto('AQA', `batch ${stamp} ${suffix}`, siteId));
-      expect(status).toBe(200);
-      ids.push((body as { id: string }).id);
-    }
+      await listAfterCreateOp.openConsole();
+      await listAfterCreateOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listAfterCreateStatus, body: agentsAfterCreate } = await sendJson(listAfterCreateOp, portal.raw, LIST_BODY_100);
+      expect(listAfterCreateStatus).toBe(200);
+      const idsAfterCreate = (agentsAfterCreate as Array<{ id: string }>).map(a => a.id);
+      for (const id of ids) expect(idsAfterCreate, `Expected agent ${id} to appear in List Agents`).toContain(id);
 
-    const batchOp = await portal.openOperation('Agent Management', /^Batch Delete Agents/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await batchOp.openConsole();
-    await batchOp.selectSubscriptionKey(API_KEY_OPTION);
-    // ADO 37324: body is a bare array of id strings — sendJson stringifies it as `["id1","id2"]`.
-    const { status } = await sendJson(batchOp, portal.raw, ids);
-    expect(status).toBe(200);
+      const batchOp = await portal.openOperation('Agent Management', /^Batch Delete Agents/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await batchOp.openConsole();
+      await batchOp.selectSubscriptionKey(API_KEY_OPTION);
+      // ADO 37324: body is a bare array of id strings — sendJson stringifies it as `["id1","id2"]`.
+      const { status } = await sendJson(batchOp, portal.raw, ids);
+      expect(status).toBe(200);
+      batchDeleteSucceeded = true;
+
+      // Verify by a SEPARATE request that Batch Delete actually removed both records.
+      const listAfterDeleteOp = await portal.openOperation('Agent Management', /^List Agents/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listAfterDeleteOp.openConsole();
+      await listAfterDeleteOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listAfterDeleteStatus, body: agentsAfterDelete } = await sendJson(listAfterDeleteOp, portal.raw, LIST_BODY_100);
+      expect(listAfterDeleteStatus).toBe(200);
+      const idsAfterDelete = (agentsAfterDelete as Array<{ id: string }>).map(a => a.id);
+      for (const id of ids) expect(idsAfterDelete, `Expected agent ${id} to no longer appear in List Agents`).not.toContain(id);
+    } finally {
+      // Cleanup for an assertion failure anywhere ABOVE the Batch Delete call
+      // (Create, or the post-Create List verification) — without this, a
+      // failure there orphans 1-2 disposable agents permanently. If Batch
+      // Delete itself already succeeded, these are all no-ops (Delete Agent
+      // on an already-deleted id is expected to fail harmlessly).
+      if (!batchDeleteSucceeded) {
+        for (const id of ids) await tryDeleteAgent(portal, id);
+      }
+    }
   });
 
   test('Create Agent Extension Mapping → Update Agent Extension → Delete Agent Extension — full round trip', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
 
-    const listAgentsOp = await portal.openOperation('Agent Management', /^List Agents/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listAgentsOp.openConsole();
-    await listAgentsOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status: agentsStatus, body: agentsBody } = await sendJson(listAgentsOp, portal.raw, LIST_BODY_100);
-    expect(agentsStatus).toBe(200);
-    const freeAgent = (agentsBody as Array<{ id: string; assignedExtension: boolean | null }>)
-      .find(a => !a.assignedExtension);
-    expect(freeAgent, 'Expected at least one agent with no assigned extension in this account').toBeTruthy();
+    const freeAgent = await requireUnassignedAgent(portal);
+    test.skip(!freeAgent, noSeedDataReason('No agent with an unassigned extension found (List Agents).'));
 
-    const listExtensionsOp = await portal.openOperation('Extension Management', /^List Extensions/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listExtensionsOp.openConsole();
-    await listExtensionsOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status: extStatus, body: extBody } = await sendJson(listExtensionsOp, portal.raw, LIST_BODY_100);
-    expect(extStatus).toBe(200);
-    const ZERO_GUID = '00000000-0000-0000-0000-000000000000';
-    const freeExtension = (extBody as Array<{ id: string; agentId: string }>).find(e => e.agentId === ZERO_GUID);
-    expect(freeExtension, 'Expected at least one unassigned extension in this account').toBeTruthy();
+    const freeExtension = await requireUnassignedExtension(portal);
+    test.skip(!freeExtension, noSeedDataReason('No unassigned extension found (List Extensions).'));
 
     // `openConsole(..., { retries })` here: the Send-never-fires console race
     // hit the Delete step of this round trip on 2026-08-29 (page.waitForResponse
     // 30s timeout) — reopening the operation fresh clears the blind console.
+    /** Reads the extension's own `agentId` back via `List Extensions` (no `Get` op takes just an extensionId here that also returns `agentId`). */
+    async function extensionAgentId(): Promise<string | undefined> {
+      const op = await openConsole(portal, 'Extension Management', /^List Extensions/, { retries: 2 });
+      await op.selectSubscriptionKey(API_KEY_OPTION);
+      const { status, body } = await sendJson(op, portal.raw, LIST_BODY_100);
+      expect(status).toBe(200);
+      return (body as Array<{ id: string; agentId: string }>).find(e => e.id === freeExtension!.id)?.agentId;
+    }
+
     const createOp = await openConsole(portal, 'Agent Management', /^Create Agent Extension Mapping/, { retries: 3 });
     await createOp.selectSubscriptionKey(API_KEY_OPTION);
     const { status: createStatus, body: created } = await sendJson(createOp, portal.raw, {
@@ -344,17 +423,42 @@ test.describe('Developer Portal (staging) — Agent Management API', () => {
     const assignment = created as { id: string; agentId: string; extensionId: string };
     expect(assignment.agentId).toBe(freeAgent!.id);
 
-    const updateOp = await openConsole(portal, 'Agent Management', /^Update Agent Extension/, { retries: 3 });
-    await updateOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status: updateStatus } = await sendJson(updateOp, portal.raw, {
-      id: assignment.id, agentId: freeAgent!.id, extensionId: freeExtension!.id,
-    });
-    expect(updateStatus).toBe(200);
+    let deleteSucceeded = false;
+    try {
+      // Verify by a SEPARATE request that Create actually persisted the assignment.
+      expect(await extensionAgentId(), 'Expected the extension\'s agentId to be the newly assigned agent').toBe(freeAgent!.id);
 
-    const deleteOp = await openConsole(portal, 'Agent Management', /^Delete Agent Extension/, { retries: 3 });
-    await deleteOp.selectSubscriptionKey(API_KEY_OPTION);
-    await deleteOp.fillParameters(assignment.id);
-    const { status: deleteStatus } = await deleteOp.send();
-    expect(deleteStatus).toBe(200);
+      const updateOp = await openConsole(portal, 'Agent Management', /^Update Agent Extension/, { retries: 3 });
+      await updateOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: updateStatus } = await sendJson(updateOp, portal.raw, {
+        id: assignment.id, agentId: freeAgent!.id, extensionId: freeExtension!.id,
+      });
+      expect(updateStatus).toBe(200);
+
+      // Verify by a SEPARATE request that the (no-op) Update still leaves the assignment persisted.
+      expect(await extensionAgentId(), 'Expected the extension\'s agentId to remain assigned after Update').toBe(freeAgent!.id);
+
+      const deleteOp = await openConsole(portal, 'Agent Management', /^Delete Agent Extension/, { retries: 3 });
+      await deleteOp.selectSubscriptionKey(API_KEY_OPTION);
+      await deleteOp.fillParameters(assignment.id);
+      const { status: deleteStatus } = await deleteOp.send();
+      expect(deleteStatus).toBe(200);
+      deleteSucceeded = true;
+
+      // Verify by a SEPARATE request that Delete actually removed the assignment.
+      expect(await extensionAgentId(), 'Expected the extension to be unassigned after Delete').toBe(ZERO_GUID);
+    } finally {
+      // Cleanup for an assertion failure anywhere ABOVE (the two verify
+      // reads, Update, or Delete itself) — without this, a failure there
+      // leaves the borrowed (pre-existing, not created by this test)
+      // extension permanently assigned instead of restored to unassigned.
+      // No-op if Delete already succeeded.
+      if (!deleteSucceeded) {
+        const cleanupOp = await openConsole(portal, 'Agent Management', /^Delete Agent Extension/, { retries: 3 });
+        await cleanupOp.selectSubscriptionKey(API_KEY_OPTION);
+        await cleanupOp.fillParameters(assignment.id);
+        await cleanupOp.send().catch(() => { /* best-effort cleanup */ });
+      }
+    }
   });
 });

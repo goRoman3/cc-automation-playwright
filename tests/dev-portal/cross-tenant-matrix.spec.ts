@@ -1,8 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { test, expect } from '../../fixtures/fixtures';
+import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import {
   MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs,
+  requireSecondSite, noSeedDataReason,
 } from './_helpers';
 import { runCrossTenantMatrix, renderMatrix } from './_cross-tenant';
 import { CATALOG } from './cross-tenant-catalog';
@@ -37,7 +39,7 @@ import { mergedCatalog, planGaps } from './cross-tenant-plans';
  * See `tests/dev-portal/UNVERIFIED.md`.
  */
 const REPORT_PATH = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29/cross-tenant-matrix-latest.md',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29/cross-tenant-matrix-latest.md',
 );
 
 test.describe('Development portal (staging) — cross-tenant isolation matrix (127 operations)', () => {
@@ -49,6 +51,22 @@ test.describe('Development portal (staging) — cross-tenant isolation matrix (1
   test.afterEach(async ({ page }) => { await closeExtraTabs(page); });
 
   test('READ + WRITE isolation over every applicable operation, one site switch', async ({ page, homePage }) => {
+    // Early guard — a single-site (or zero-site) Roman_QA_TEST can't
+    // complete the A→B switch this whole matrix depends on. Without this,
+    // the same failure still happens (inside `runCrossTenantMatrix`'s own
+    // switch step, surfacing as `res.switchThrew` and failing the hard
+    // `expect(res.switchThrew).toBeNull()` below) but only after already
+    // running the full read/write sweep pointlessly under site A.
+    //
+    // Closes its own portal tab before `runCrossTenantMatrix` opens its
+    // own — the portal's SSO session tolerates only one open tab at a time
+    // (see `closeExtraTabs`'s doc in `_helpers.ts`), and `openFrom` always
+    // opens a fresh popup, never reuses one.
+    const portalForSiteCheck = await DeveloperPortalPage.openFrom(homePage);
+    const secondSite = await requireSecondSite(portalForSiteCheck);
+    await closeExtraTabs(page);
+    test.skip(!secondSite, noSeedDataReason('List Sites found fewer than 2 sites — the matrix has nothing to switch to.'));
+
     const gaps = planGaps();
     expect(gaps.reads, 'every read-class op must have a ReadPlan').toEqual([]);
     expect(gaps.writes, 'every write-class op must have a WritePlan').toEqual([]);

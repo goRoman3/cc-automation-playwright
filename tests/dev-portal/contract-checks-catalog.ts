@@ -1,5 +1,5 @@
 import {
-  KNOWN, LIST_BODY, LIST_BODY_100, fireConsole, currentSiteId, agentDto,
+  TARGET_CUSTOMER_ID, LIST_BODY, LIST_BODY_100, fireConsole, currentSiteId, agentDto,
 } from './_helpers';
 import type { ContractSpec } from './_contract-checks';
 
@@ -34,7 +34,7 @@ export const CONTRACT_SPECS: ContractSpec[] = [
   // ── Get Agent — MUST catch customerId = zero GUID ──────────────────────
   {
     id: 'contract/get-agent', group: 'Agent Management', operation: 'Get Agent',
-    match: /^Get Agent \(/,
+    match: /^Preview Agent \(/,
     resolve: async portal => {
       const l = await fireConsole(portal, 'Agent Management', /^List Agents/, { body: LIST_BODY_100 });
       return { agentId: String(rowsOf(l.body)[0]?.id ?? '') };
@@ -89,7 +89,7 @@ export const CONTRACT_SPECS: ContractSpec[] = [
       const l = await fireConsole(portal, 'Agent Management', /^List Agents/, { body: LIST_BODY_100 });
       return { agentId: String(rowsOf(l.body)[0]?.id ?? ''), name: `AQA contract grp ${stamp()}` };
     },
-    body: r => ({ customerId: KNOWN.customerId, name: r.name, isActive: true, agentJson: JSON.stringify([r.agentId]) }),
+    body: r => ({ customerId: TARGET_CUSTOMER_ID, name: r.name, isActive: true, agentJson: JSON.stringify([r.agentId]) }),
     assertions: [
       // CONFIRMED (P1-CREATE-AGENT-GROUP-ID-ZERO): response id is always 0
       { path: 'id', check: 'positive-int', expect: 'known-bug', note: 'P1-CREATE-AGENT-GROUP-ID-ZERO — Create response id is always 0 (real id only readable via List); flips to FIXED-FLIP-ME when a real id is returned' },
@@ -161,7 +161,7 @@ export const CONTRACT_SPECS: ContractSpec[] = [
   // ── Get Call Info — model shape (widely used downstream) ──────────────
   {
     id: 'contract/get-call-info', group: 'Calls', operation: 'Get Call Info',
-    match: /^Get Call Info/,
+    match: /^Preview Call Info/,
     resolve: async portal => {
       const l = await fireConsole(portal, 'Calls', /^List Calls/, { body: LIST_BODY });
       return { callId: String((rowsOf(l.body)[0] as { Id?: string })?.Id ?? '') };

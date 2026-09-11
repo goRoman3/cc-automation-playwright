@@ -1,0 +1,5075 @@
+{
+ "takenAt": "2026-09-04",
+ "gateway": "https://developer1.callcabinet.com",
+ "operations": [
+  {
+   "tag": "Agent Management",
+   "name": "Batch Delete Agents",
+   "method": "POST",
+   "path": "api/settings/agents/delete-batch",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "[]",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Create Agent",
+   "method": "POST",
+   "path": "api/settings/agents",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "firstName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "lastName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "email",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "site",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "enableScreenshots",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "enableCompliance",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "emailOnQcComplete",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "screenshotInterval",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "windowsUsername",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "supervisor",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "specialEmail",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "mEmail",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "assignedSupervisor",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "assignedExtension",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "groups",
+     "type": "array<integer>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "extensions",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "notes",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Create Agent Extension Mapping",
+   "method": "POST",
+   "path": "api/settings/agent-extensions",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "agentId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "agentName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "extensionName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "extensionId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Delete Agent",
+   "method": "DELETE",
+   "path": "api/settings/delete-agents",
+   "pathParams": [
+    {
+     "name": "agentId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Delete Agent Extension",
+   "method": "DELETE",
+   "path": "api/settings/delete-agent-extensions",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Agent Management",
+   "name": "List Agent Extensions",
+   "method": "POST",
+   "path": "api/settings/agents/extensions",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "agentId",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "siteId",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "serverSearch",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "pattern",
+     "type": "string",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Agent Management",
+   "name": "List Agents",
+   "method": "POST",
+   "path": "api/settings/agents/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Agent Management",
+   "name": "List Supervisors",
+   "method": "GET",
+   "path": "api/settings/agents/supervisors",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Preview Agent",
+   "method": "GET",
+   "path": "api/settings/get-agents",
+   "pathParams": [
+    {
+     "name": "agentId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Update Agent",
+   "method": "POST",
+   "path": "api/settings/agents/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "firstName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "lastName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "email",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "site",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "enableScreenshots",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "enableCompliance",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "emailOnQcComplete",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "screenshotInterval",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "windowsUsername",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "supervisor",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "specialEmail",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "mEmail",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "assignedSupervisor",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "assignedExtension",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "groups",
+     "type": "array<integer>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "extensions",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "extensionsJson",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "groupsJson",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "notes",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Agent Management",
+   "name": "Update Agent Extension",
+   "method": "POST",
+   "path": "api/settings/agent-extensions/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "agentId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "agentName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "extensionName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "extensionId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "Add Call Note",
+   "method": "POST",
+   "path": "api/calls/post-notes",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "object",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "Note",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "StartTime",
+     "type": "number",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "EndTime",
+     "type": "number",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "Batch Apply Legal Hold (calls/calls/legal-hold/batch)",
+   "method": "POST",
+   "path": "api/calls/calls/legal-hold/batch",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Batch Expire Calls (calls/calls)",
+   "method": "DELETE",
+   "path": "api/calls/delete-calls",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Delete Call Note",
+   "method": "DELETE",
+   "path": "api/calls/delete-notes",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "noteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Download All Media",
+   "method": "POST",
+   "path": "api/download/calls/download-all-media",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "timeZoneName",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "timeZone",
+     "type": "number",
+     "required": false
+    },
+    {
+     "name": "userHasDST",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Download Audio Chunk",
+   "method": "GET",
+   "path": "api/download/calls/download-audio-chunk",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "timeZone",
+     "type": "number",
+     "required": true
+    },
+    {
+     "name": "timeZoneName",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "startIntervalTime",
+     "type": "integer",
+     "required": false
+    },
+    {
+     "name": "endIntervalTime",
+     "type": "integer",
+     "required": false
+    },
+    {
+     "name": "userHasDST",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Download Single Audio File",
+   "method": "GET",
+   "path": "api/download/calls/download-single-audio-file",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "timeZoneName",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "timeZone",
+     "type": "number",
+     "required": false
+    },
+    {
+     "name": "userHasDST",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Email Call",
+   "method": "POST",
+   "path": "api/calls/email",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "multiple",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "mails",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "subject",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "callId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "callIds",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "List Call Notes",
+   "method": "GET",
+   "path": "api/calls/notes",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "List Calls",
+   "method": "POST",
+   "path": "calls/calls/search",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "singleCall",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "clientRef",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "phoneSystemCallid",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "agentsJson",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "pendingCalls",
+     "type": "boolean",
+     "required": false
+    },
+    {
+     "name": "keyword",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "dateFrom",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "dateTo",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "phoneNumber",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "page",
+     "type": "integer",
+     "required": false
+    },
+    {
+     "name": "pageSize",
+     "type": "integer",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "speaker",
+     "type": "integer/int32",
+     "required": false,
+     "enum": [
+      0,
+      1,
+      2
+     ]
+    },
+    {
+     "name": "terms",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "query",
+     "type": "?",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "ai_search_enabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "List Linked Calls",
+   "method": "GET",
+   "path": "api/calls/details/linked",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Preview Call Info",
+   "method": "GET",
+   "path": "api/calls/details",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "message",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "formId",
+     "type": "string",
+     "required": false
+    },
+    {
+     "name": "qcRando",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Preview Call PCI Data",
+   "method": "GET",
+   "path": "api/media/call-details/call-pci",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Preview Call Transcription",
+   "method": "GET",
+   "path": "api/calls/details/call-transcription",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Reassign Calls",
+   "method": "POST",
+   "path": "api/settings/agents/reassign-calls",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "fromString",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "toString",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "extId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "extName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "agentName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "Update Call Note",
+   "method": "PUT",
+   "path": "api/calls/put-notes",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "noteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "noteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "note",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "Update Call Note Details",
+   "method": "PUT",
+   "path": "api/calls/put-notes-1",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "noteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "startTime",
+     "type": "integer",
+     "required": false
+    },
+    {
+     "name": "endTime",
+     "type": "integer",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Update Call Tags",
+   "method": "PUT",
+   "path": "api/calls/put-calls",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "callId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "tagsIds",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Calls",
+   "name": "Update Legal Hold",
+   "method": "PATCH",
+   "path": "api/calls/calls/legal-hold",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Calls",
+   "name": "Update Multiple Call Tags",
+   "method": "PUT",
+   "path": "api/calls/calls/put-tags",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "callIds",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "tagsIdsToAdd",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "tagsIdsToRemove",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Chats",
+   "name": "Add Chat Note",
+   "method": "POST",
+   "path": "api/calls/chats/post-notes",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "chatRecordId",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "messageId",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "note",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Chats",
+   "name": "Delete Chat Note",
+   "method": "DELETE",
+   "path": "api/calls/chats/delete-notes",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "noteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Chats",
+   "name": "Download Chat",
+   "method": "GET",
+   "path": "api/calls/chats/get-download",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "timeZone",
+     "type": "number",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Chats",
+   "name": "List Chat Message Notes",
+   "method": "GET",
+   "path": "api/calls/chats/messages/notes",
+   "pathParams": [
+    {
+     "name": "messageId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Chats",
+   "name": "List Chat Messages",
+   "method": "POST",
+   "path": "api/calls/chats/messages",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "timeZone",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "docId",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Chats",
+   "name": "List Chat Notes",
+   "method": "GET",
+   "path": "api/calls/chats/notes",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Chats",
+   "name": "List Chats",
+   "method": "POST",
+   "path": "api/calls/chats/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "terms",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Chats",
+   "name": "Preview Chat Details",
+   "method": "POST",
+   "path": "api/calls/chats",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "date",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "direction",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "numDocs",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Chats",
+   "name": "Submit Chat Email",
+   "method": "POST",
+   "path": "api/calls/chats/email",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "timeZone",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "mails",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "subject",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "chatRecordIds",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Chats",
+   "name": "Update Chat Note",
+   "method": "PUT",
+   "path": "api/calls/put-chats",
+   "pathParams": [
+    {
+     "name": "chatId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "noteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "noteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "note",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Extension Management",
+   "name": "Create Extension",
+   "method": "POST",
+   "path": "api/settings/extensions",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "siteName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "recordingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "selectiveRecording",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteRecordingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "assignedCalls",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "enableSTT",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "recordingLicenseAssigned",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "to",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "reasignCalls",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "platformType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "platformTypeName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isRedactionAutomated",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "videoApplicationSharing",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "stereoRecordingAndStorage",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "transcriptionAnalytics",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "transcriptionAnalyticsName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isArchived",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateDeleted",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateArchived",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoN",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "hasMultichannelGroup",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensions",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensionsJSON",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensionsAdded",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensionsRemoved",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "extensionMultichannelGroupId",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "chatAddon",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Extension Management",
+   "name": "Delete Extension",
+   "method": "POST",
+   "path": "api/settings/extensions/delete-or-archive",
+   "pathParams": [
+    {
+     "name": "extensionId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "isArchive",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Extension Management",
+   "name": "List Extensions",
+   "method": "POST",
+   "path": "api/settings/extensions/list",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "showDeleted",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Extension Management",
+   "name": "Preview Extension",
+   "method": "GET",
+   "path": "api/settings/get-extensions",
+   "pathParams": [
+    {
+     "name": "extensionId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Extension Management",
+   "name": "Reassign Extension",
+   "method": "POST",
+   "path": "api/settings/extensions/reassign",
+   "pathParams": [
+    {
+     "name": "selectedId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "newId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Extension Management",
+   "name": "Update Extension",
+   "method": "POST",
+   "path": "api/settings/extensions/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "siteName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "recordingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "selectiveRecording",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteRecordingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "assignedCalls",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "enableSTT",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "recordingLicenseAssigned",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "fromString",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "to",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "toString",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "reasignCalls",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "platformType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "platformTypeName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isRedactionAutomated",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "videoApplicationSharing",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "stereoRecordingAndStorage",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "transcriptionAnalytics",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "transcriptionAnalyticsName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isArchived",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateDeleted",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateArchived",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoN",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "hasMultichannelGroup",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensions",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensionsJSON",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensionsAdded",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "multichannelExtensionsRemoved",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "extensionMultichannelGroupId",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "chatAddon",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "General Settings",
+   "name": "List Storage Locations",
+   "method": "GET",
+   "path": "api/settings/general/storage-locations",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "includeInheritOption",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "General Settings",
+   "name": "Preview Company Info",
+   "method": "GET",
+   "path": "settings/general/company-settings",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "General Settings",
+   "name": "Preview SSO Configuration",
+   "method": "POST",
+   "path": "api/settings/sso-configuration",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "General Settings",
+   "name": "Update Company Settings",
+   "method": "PUT",
+   "path": "settings/general/company-settings/put",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "emailAddress",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "address",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "city",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "state",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "zip",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "phoneNumber",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "url",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "sendWeeklyEmail",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "downloadFormat",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "dateFormat",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "storageLocationId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "exportDateFormat",
+     "type": "object",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "includeDownloadNameInExport",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "callDownloadEnabled",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "callEmailingEnabled",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "callSharingEnabled",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "businessContact",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "complianceContact",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "financeContact",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "manualTranscriptionAndSummary",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "manualRedaction",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "isSentimentEnabled",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "isApprovedUserDomainsEnabled",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "approvedUserDomains",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "enablePII",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "emailAgentOnCompletedEval",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "qCEmailMessage",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "emailMOnCompletedQC",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "dontGreyOutQC",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "showQcProgress",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "showQcScore",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "enableQCFormCoaching",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "qCCompletedEmailWithScreenshot",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "scoreRoundingPoints",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareMaximumTime",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "userOTPForShares",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareGeneralNotes",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareTimeBasedNotes",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "sharePointInTimeNotes",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareScreenshots",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareExtensions",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareMachineTranscription",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareDownloadableCall",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "shareCallWithPermissionToAddNote",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "isApprovedSharingDomainsEnabled",
+     "type": "boolean",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "approvedSharingDomains",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "General Settings",
+   "name": "Update SSO Settings",
+   "method": "PUT",
+   "path": "api/settings/sso-configuration/sso-settings",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "disableNonSSOLogin",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "securityNotifications",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "securityNotificationsEmail",
+     "type": "string/email",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isNewUserEmailNotificationEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "newUserNotificationEmails",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoFactorType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "winAuthEndpoint",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "ssoAzureClaim",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "loginIdleTimeout",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "beIdleForAccess",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Group Management",
+   "name": "Create Agent Group",
+   "method": "POST",
+   "path": "api/settings/agent-groups",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agents",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentJson",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Group Management",
+   "name": "Delete Agent Group",
+   "method": "DELETE",
+   "path": "api/settings/delete-agent-groups",
+   "pathParams": [
+    {
+     "name": "agentGroupId",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Group Management",
+   "name": "List Agent Groups",
+   "method": "POST",
+   "path": "api/settings/agent-groups/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Group Management",
+   "name": "Preview Agent Group",
+   "method": "GET",
+   "path": "api/settings/get-agent-groups",
+   "pathParams": [
+    {
+     "name": "groupId",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Group Management",
+   "name": "Update Agent Group",
+   "method": "POST",
+   "path": "api/settings/agent-groups/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agents",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "agentJson",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Heartbeats",
+   "name": "Delete Client Heartbeat",
+   "method": "DELETE",
+   "path": "api/qc/ClientHeartbeats/DeleteHeartbeat",
+   "pathParams": [
+    {
+     "name": "entryId",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Heartbeats",
+   "name": "Delete Server Heartbeat",
+   "method": "DELETE",
+   "path": "api/admin/heartbeats/delete",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Heartbeats",
+   "name": "List Client Heartbeats",
+   "method": "POST",
+   "path": "api/qc/ClientHeartbeats/GetHeartbeatsTable",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "showActive",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Heartbeats",
+   "name": "List Server Heartbeats",
+   "method": "POST",
+   "path": "api/admin/heartbeats/list",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "readDeleted",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "IP Whitelist",
+   "name": "Add IP Whitelist",
+   "method": "POST",
+   "path": "api/settings/ip-whitelist",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "ipAddress",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "IP Whitelist",
+   "name": "Delete IP Whitelist",
+   "method": "POST",
+   "path": "api/settings/ip-whitelist/delete",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "ipAddress",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "IP Whitelist",
+   "name": "List IP Whitelist",
+   "method": "POST",
+   "path": "api/settings/ip-whitelist/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Logs",
+   "name": "List Logs",
+   "method": "POST",
+   "path": "api/logs/CustomerLogs/Read",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Manual Redaction",
+   "name": "List Call Redaction Requests",
+   "method": "GET",
+   "path": "api/calls/redaction",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Manual Redaction",
+   "name": "Submit Call Redaction Request",
+   "method": "POST",
+   "path": "api/calls/post-redaction",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "callId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "dateCreated",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "requestedUserId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "requestUserName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "requestName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "entityType",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "entityTypeId",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "startMilliseconds",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "endMilliseconds",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "requestText",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "redactionApproval",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "approvalUserId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateModified",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isRedactionApproved",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Notifications",
+   "name": "Create Notification Rule",
+   "method": "POST",
+   "path": "api/settings/notifications",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "emailsToSend",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "webhook",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggerType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggerTypeStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "actionType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "actionTypeStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggeredByParticipant",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggeredByParticipantStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "keyWord",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScoreValue",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScoreValueStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScoreOperator",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScorePath",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "stampCreated",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "tagIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "groupIds",
+     "type": "array<integer>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Notifications",
+   "name": "Delete Alert Configuration",
+   "method": "DELETE",
+   "path": "api/settings/delete-alerts",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "name",
+     "type": "string",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "Delete Notification Rule",
+   "method": "DELETE",
+   "path": "api/settings/delete-notifications",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Alert Events",
+   "method": "POST",
+   "path": "api/settings/alerts/events",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Alert Trigger Operators",
+   "method": "GET",
+   "path": "api/settings/alerts/trigger-operators",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Alert Trigger Topics",
+   "method": "GET",
+   "path": "api/settings/alerts/trigger-topics",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Alert Types",
+   "method": "GET",
+   "path": "api/settings/alerts/types",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Notification Rules",
+   "method": "POST",
+   "path": "api/settings/notifications/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Notifications Action Types",
+   "method": "GET",
+   "path": "api/settings/notifications/action-types",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Notifications Participant Types",
+   "method": "GET",
+   "path": "api/settings/notifications/participant-types",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "List Notifications Trigger Types",
+   "method": "GET",
+   "path": "api/settings/notifications/trigger-types",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "Preview  Alert Notification",
+   "method": "GET",
+   "path": "api/settings/alerts/old",
+   "pathParams": [
+    {
+     "name": "notificationId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "Preview Alert Configuration",
+   "method": "GET",
+   "path": "api/settings/get-alerts",
+   "pathParams": [
+    {
+     "name": "notificationId",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Notifications",
+   "name": "Preview Alert Log",
+   "method": "POST",
+   "path": "api/settings/alerts/preview-log",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "customerID",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "notificationTypeID",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "windowType",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "windowValue",
+     "type": "number/float",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "triggers",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "filters",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Notifications",
+   "name": "Update Notification Rule",
+   "method": "POST",
+   "path": "api/settings/notifications/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "emailsToSend",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "webhook",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggerType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggerTypeStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "actionType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "actionTypeStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggeredByParticipant",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggeredByParticipantStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "keyWord",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScoreValue",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScoreValueStr",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScoreOperator",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationScorePath",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "applicationName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "stampCreated",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "tagIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "groupIds",
+     "type": "array<integer>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Notifications",
+   "name": "Upsert Alert Configuration",
+   "method": "POST",
+   "path": "api/settings/alerts",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "name",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "notificationCooldown",
+     "type": "number/float",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "windowType",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "windowValue",
+     "type": "number/float",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "emailAddresses",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "webhooks",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "id",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "customerID",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "notificationTypeID",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "tags",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "triggers",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "filters",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "QA",
+   "name": "Email QA",
+   "method": "POST",
+   "path": "api/qc/Quality/SendQCByMail",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "formId",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "mails",
+     "type": "array<string>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "subject",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "attachCall",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "shareModel",
+     "type": "object",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "QA",
+   "name": "Export QA Excel",
+   "method": "POST",
+   "path": "api/qc/Quality/GetExcel",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "integer/int64",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "completedBy",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "completedOnDate",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "completedOn",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "notes",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "points",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "nominalPoints",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "maxPoints",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "questions",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sections",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "scoreRoundingPoints",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "totalPercent",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "nominalPercent",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "qcFormCoachingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isCoachingRequested",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "coachingStatus",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "coachUserFullName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "qcFormsID",
+     "type": "integer/int64",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "editHistoryDetails",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "QA",
+   "name": "Export QA PDF",
+   "method": "POST",
+   "path": "api/qc/Quality/GetPdf",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "QA",
+   "name": "List All QAs",
+   "method": "GET",
+   "path": "api/qc/Quality/GetAllForms",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "QA",
+   "name": "List Available QAs",
+   "method": "GET",
+   "path": "api/qc/Quality/GetForms",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "QA",
+   "name": "List Completed Qas",
+   "method": "GET",
+   "path": "api/qc/Quality/GetAnsweredForms",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "QA",
+   "name": "Preview AQA Phrases",
+   "method": "GET",
+   "path": "api/calls/details/aqa-phrases",
+   "pathParams": [
+    {
+     "name": "callId",
+     "type": "string",
+     "required": true
+    },
+    {
+     "name": "formId",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "QA",
+   "name": "Preview QA",
+   "method": "GET",
+   "path": "api/qc/Quality/GetForm",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "QA",
+   "name": "Save completed QAs",
+   "method": "POST",
+   "path": "api/qc/Quality/SaveCompletedForm",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "integer/int64",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "completedId",
+     "type": "integer/int64",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "notes",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "callId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "questions",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "sections",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "emailAgent",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "emailSupervisor",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "qcInProgress",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isCoachingRequested",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "coachUserID",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sendToAnalytics",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "automationId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "originalFormStampLastModified",
+     "type": "string/date-time",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "QA",
+   "name": "Suppress QA",
+   "method": "PUT",
+   "path": "api/qc/Quality/SuppressForm",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "integer",
+     "required": true
+    },
+    {
+     "name": "suppress",
+     "type": "boolean",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "isNewAutoForm",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Delete Report Template",
+   "method": "POST",
+   "path": "api/reports/reports/delete-report-template",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "List Report Templates",
+   "method": "GET",
+   "path": "api/reports/reports/get-report-templates",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "List Sites Storage Usage",
+   "method": "GET",
+   "path": "api/reports/call-statistics/get-sites-usage",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview Call Volume Statistics",
+   "method": "GET",
+   "path": "api/reports/call-statistics/get-call-volume",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "period",
+     "type": "integer",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview Calls Counter",
+   "method": "GET",
+   "path": "api/reports/call-statistics/get-calls-counter",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview Report By Template",
+   "method": "POST",
+   "path": "api/reports/reports/get-report-chart",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "templateId",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "criteriaId",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "timeZone",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "startString",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "endString",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "allDates",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "includeNulls",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "formCallDateRange",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "includeDeleted",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "criteriaParams",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "agentParams",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "extensionParams",
+     "type": "array<object>",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "timePeriod",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "reportTemplateName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "criteriaAdditionalParams",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview Site Usage Statistics",
+   "method": "GET",
+   "path": "api/admin/sites/get-usage",
+   "pathParams": [
+    {
+     "name": "siteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview Six Month Call Volume",
+   "method": "GET",
+   "path": "api/reports/reports/get-call-volume-last-6-months",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview Storage Usage",
+   "method": "GET",
+   "path": "api/reports/call-statistics/get-storage-usage",
+   "pathParams": [
+    {
+     "name": "siteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Reports",
+   "name": "Preview User Activity Summary",
+   "method": "GET",
+   "path": "api/reports/call-statistics/get-user-activity",
+   "pathParams": [
+    {
+     "name": "period",
+     "type": "integer",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Restricted User Management",
+   "name": "List Restricted Accesses",
+   "method": "POST",
+   "path": "api/settings/restricted-access/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Restricted User Management",
+   "name": "Preview Restricted User",
+   "method": "GET",
+   "path": "api/settings/restricted-access",
+   "pathParams": [
+    {
+     "name": "userId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Restricted User Management",
+   "name": "Update Restricted User Access",
+   "method": "PUT",
+   "path": "settings/restricted-access/access",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "userId",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "agentIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "siteIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "groupIds",
+     "type": "array<string>",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Retention Management",
+   "name": "List Retention Policies",
+   "method": "POST",
+   "path": "api/settings/retention/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Retention Management",
+   "name": "Update Retention Policy",
+   "method": "POST",
+   "path": "api/settings/retention/update",
+   "pathParams": [
+    {
+     "name": "siteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "expirationDays",
+     "type": "integer",
+     "required": false
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "Role Management",
+   "name": "Create Custom Role",
+   "method": "POST",
+   "path": "api/settings/custom-roles",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "access",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "locked",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Role Management",
+   "name": "Delete Custom Role",
+   "method": "DELETE",
+   "path": "api/settings/delete-custom-roles",
+   "pathParams": [
+    {
+     "name": "id",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Role Management",
+   "name": "List Custom Role Restrictions",
+   "method": "GET",
+   "path": "api/settings/custom-roles/restrictions",
+   "pathParams": [],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Role Management",
+   "name": "List Custom Roles",
+   "method": "POST",
+   "path": "api/settings/custom-roles/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Role Management",
+   "name": "Preview Custom Role",
+   "method": "GET",
+   "path": "api/settings/get-custom-roles",
+   "pathParams": [
+    {
+     "name": "roleId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Role Management",
+   "name": "Update Custom Role",
+   "method": "POST",
+   "path": "api/settings/custom-roles/permissions",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "access",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "locked",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Site Management",
+   "name": "Create Site",
+   "method": "POST",
+   "path": "api/settings/sites",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "uploadWindowStartTime",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "uploadWindowDuration",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "foundationURL",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "defaultComplianceInterval",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "selectiveRecordingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "selectiveRecordingForNewExt",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "hideUntilSTTComplete",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "storageLocation",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "storageLocationId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isInheritedStorageFromCustomer",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sttLanguage",
+     "type": "string",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Site Management",
+   "name": "Delete Site",
+   "method": "DELETE",
+   "path": "api/settings/delete-sites",
+   "pathParams": [
+    {
+     "name": "siteId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Site Management",
+   "name": "List Sites",
+   "method": "POST",
+   "path": "api/settings/sites/list",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Site Management",
+   "name": "Update Site",
+   "method": "POST",
+   "path": "api/settings/sites/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "uploadWindowStartTime",
+     "type": "string/date-span",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "uploadWindowDuration",
+     "type": "string/date-span",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "foundationURL",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "defaultComplianceInterval",
+     "type": "number/double",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "selectiveRecordingEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "selectiveRecordingForNewExt",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "hideUntilSTTComplete",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "storageLocation",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "storageLocationId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isInheritedStorageFromCustomer",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sttLanguage",
+     "type": "string",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Tag Management",
+   "name": "Create Tag",
+   "method": "POST",
+   "path": "api/settings/tags",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Tag Management",
+   "name": "Delete Tag",
+   "method": "DELETE",
+   "path": "api/settings/delete-tags",
+   "pathParams": [
+    {
+     "name": "tagId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "Tag Management",
+   "name": "List Tags",
+   "method": "POST",
+   "path": "api/settings/tags/list",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "showInactiveTags",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "Tag Management",
+   "name": "Update Tag",
+   "method": "POST",
+   "path": "api/settings/tags/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "customerId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dontSaveOldTag",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "User Management",
+   "name": "Create User",
+   "method": "POST",
+   "path": "api/settings/users",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "userRId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userCRId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userCR",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userRoleIdCombined",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "userRoleNameCombined",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userR",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "qcRId",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "qcR",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "email",
+     "type": "string/email",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "firstName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "lastName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "phoneNumber",
+     "type": "string/tel",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateFormat",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userRLvl",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoFactorEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoFactorType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "notes",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "domainUsername",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "ssoOnly",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "cuIsActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "partnerID",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "useExistingData",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "timeZone",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "login",
+     "type": "string",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "User Management",
+   "name": "Delete User",
+   "method": "POST",
+   "path": "api/settings/users/delete",
+   "pathParams": [
+    {
+     "name": "userId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [
+    {
+     "name": "userRId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "body": []
+  },
+  {
+   "tag": "User Management",
+   "name": "List Users",
+   "method": "POST",
+   "path": "api/settings/users/list",
+   "pathParams": [],
+   "queryParams": [
+    {
+     "name": "showDeleted",
+     "type": "boolean",
+     "required": false
+    }
+   ],
+   "body": [
+    {
+     "name": "take",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "skip",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "sort",
+     "type": "array<object>",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "filter",
+     "type": "object",
+     "required": false,
+     "enum": null
+    }
+   ]
+  },
+  {
+   "tag": "User Management",
+   "name": "Preview User",
+   "method": "GET",
+   "path": "api/settings/get-users",
+   "pathParams": [
+    {
+     "name": "userId",
+     "type": "string",
+     "required": true
+    }
+   ],
+   "queryParams": [],
+   "body": []
+  },
+  {
+   "tag": "User Management",
+   "name": "Update User",
+   "method": "POST",
+   "path": "api/settings/users/update",
+   "pathParams": [],
+   "queryParams": [],
+   "body": [
+    {
+     "name": "id",
+     "type": "string/uuid",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "userRId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userCRId",
+     "type": "string/uuid",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userCR",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userRoleIdCombined",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userRoleNameCombined",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userR",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "qcRId",
+     "type": "integer/int32",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "qcR",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "email",
+     "type": "string/email",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "firstName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "lastName",
+     "type": "string",
+     "required": true,
+     "enum": null
+    },
+    {
+     "name": "phoneNumber",
+     "type": "string/tel",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "dateFormat",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "userRLvl",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoFactorEnabled",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "twoFactorType",
+     "type": "integer/int32",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "notes",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "domainUsername",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "isActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "ssoOnly",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "cuIsActive",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "customerName",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "useExistingData",
+     "type": "boolean",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "timeZone",
+     "type": "string",
+     "required": false,
+     "enum": null
+    },
+    {
+     "name": "login",
+     "type": "string",
+     "required": false,
+     "enum": null
+    }
+   ]
+  }
+ ]
+}

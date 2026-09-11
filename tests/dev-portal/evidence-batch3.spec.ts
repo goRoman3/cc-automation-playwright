@@ -24,7 +24,7 @@ test.describe('Developer Portal (staging) — batch 3 evidence', () => {
   async function precondition(portal: DeveloperPortalPage): Promise<Precondition> {
     let siteId: string | null = null; let siteName: string | null = null;
     try {
-      const o = await openConsole(portal, 'Reports', /^Get Sites Storage Usage/, { retries: 3 });
+      const o = await openConsole(portal, 'Reports', /^List Sites Storage Usage/, { retries: 3 });
       await o.selectSubscriptionKey(API_KEY_OPTION);
       const { body } = await o.send();
       const f = (body as Array<{ siteId?: string; id?: string; siteName?: string; name?: string }>)[0];
@@ -79,7 +79,7 @@ test.describe('Developer Portal (staging) — batch 3 evidence', () => {
 
     let getAStatus: number | null = null; let getABody: unknown = null;
     if (rowA) {
-      const g = await fire(portal, ev, 'Group Management', /^Get Agent Group \(/, undefined, [['groupId', String(rowA.id)]]);
+      const g = await fire(portal, ev, 'Group Management', /^Preview Agent Group \(/, undefined, [['groupId', String(rowA.id)]]);
       getAStatus = g.status; getABody = g.body;
     }
 

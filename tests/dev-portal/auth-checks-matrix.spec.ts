@@ -24,7 +24,7 @@ import { AUTH_OPS, AUTH_DEFERRED } from './auth-checks-catalog';
  * hypothetical assertions and the deferred modes.
  */
 const REPORT_PATH = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29/auth-checks-matrix-latest.md',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29/auth-checks-matrix-latest.md',
 );
 
 test.describe('Development portal (staging) — authorization matrix', () => {

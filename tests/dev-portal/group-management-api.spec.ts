@@ -1,8 +1,8 @@
 import { test, expect } from '../../fixtures/fixtures';
 import { DeveloperPortalPage } from '../../pages/dev-portal/DeveloperPortalPage';
 import {
-  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, KNOWN, LIST_BODY_100,
-  MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson,
+  API_KEY_OPTION, SCHEMA_LOAD_PAUSE_MS, TARGET_CUSTOMER_ID, LIST_BODY_100,
+  MISSING_CREDS_REASON, missingStagingCreds, stagingLogin, closeExtraTabs, sendJson, requireAgent, noSeedDataReason,
 } from './_helpers';
 
 /**
@@ -19,7 +19,15 @@ import {
  * `/^Add Agent Group/` regex never matched a real catalogue link, so this
  * test had never actually run to completion before. Fixed and
  * live-verified 2026-08-29: full Create → List (id readback) → Get →
- * Delete round trip passes end-to-end.
+ * Delete round trip passes end-to-end (against CC Test 1).
+ *
+ * **2026-09-04**: `Update Agent Group` used to target a pre-existing
+ * disposable group (`KNOWN.disposableAgentGroupId`, id `1004`) that only
+ * ever existed on CC Test 1 — the current target tenant, Roman_QA_TEST, has
+ * no such record. Rewritten to be **self-seeding**, the same way the
+ * lifecycle test below already is: create its own disposable group first
+ * (list-by-name to work around Create's `id: 0` response bug — see that
+ * test), update it, verify, then delete it. No pre-existing data required.
  */
 test.describe('Developer Portal (staging) — Group Management API', () => {
   test.describe.configure({ timeout: 90_000 });
@@ -38,30 +46,71 @@ test.describe('Developer Portal (staging) — Group Management API', () => {
     expect(Array.isArray(body)).toBe(true);
   });
 
-  test('Update Agent Group — no-op update on an existing disposable test group', async ({ homePage }) => {
+  test('Update Agent Group — no-op update on a self-seeded disposable group', async ({ homePage }) => {
     const portal = await DeveloperPortalPage.openFrom(homePage);
-    const groupId = KNOWN.disposableAgentGroupId;
+    const name = `AQA update-coverage group ${Date.now()}`;
+    let groupId: number | undefined;
 
-    const listOp = await portal.openOperation('Group Management', /^List Agent Groups/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listOp.openConsole();
-    await listOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status: listStatus, body: groups } = await sendJson(listOp, portal.raw, LIST_BODY_100);
-    expect(listStatus).toBe(200);
-    const current = (groups as Array<{ id: number; customerId: string; name: string; agentJson: string }>)
-      .find(g => g.id === groupId);
-    expect(current, `Expected disposable test group ${groupId} to still exist`).toBeTruthy();
+    try {
+      // Seed a real agent id — an empty agentJson is a silent no-op (KNOWN BUG).
+      const seedAgent = await requireAgent(portal);
+      test.skip(!seedAgent, noSeedDataReason('List Agents returned zero agents to seed a group with.'));
+      const agentId = seedAgent!.id;
 
-    const updateOp = await portal.openOperation('Group Management', /^Update Agent Group/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await updateOp.openConsole();
-    await updateOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { status: updateStatus, body: updated } = await sendJson(updateOp, portal.raw, {
-      id: current!.id, customerId: current!.customerId, name: current!.name,
-      isActive: true, agentJson: current!.agentJson,
-    });
-    expect(updateStatus).toBe(200);
-    expect((updated as { isActive: boolean }).isActive).toBe(true);
+      const addOp = await portal.openOperation('Group Management', /^Create Agent Group/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await addOp.openConsole();
+      await addOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: addStatus } = await sendJson(addOp, portal.raw, {
+        customerId: TARGET_CUSTOMER_ID, name, isActive: true, agentJson: JSON.stringify([agentId]),
+      });
+      expect(addStatus).toBe(200);
+
+      // The create response's `id` is always 0 (KNOWN BUG) — read the real id back.
+      const listOp = await portal.openOperation('Group Management', /^List Agent Groups/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listOp.openConsole();
+      await listOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listStatus, body: groups } = await sendJson(listOp, portal.raw, LIST_BODY_100);
+      expect(listStatus).toBe(200);
+      const current = (groups as Array<{ id: number; customerId: string; name: string; agentJson: string }>)
+        .find(g => g.name === name);
+      expect(current, 'Expected the newly seeded group to appear in List Agent Groups').toBeTruthy();
+      groupId = current!.id;
+
+      const updateOp = await portal.openOperation('Group Management', /^Update Agent Group/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await updateOp.openConsole();
+      await updateOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: updateStatus, body: updated } = await sendJson(updateOp, portal.raw, {
+        id: current!.id, customerId: current!.customerId, name: current!.name,
+        isActive: true, agentJson: current!.agentJson,
+      });
+      expect(updateStatus).toBe(200);
+      expect((updated as { isActive: boolean }).isActive).toBe(true);
+
+      // Verify by a SEPARATE request (re-List, not the Update response) that
+      // the write actually persisted.
+      const verifyOp = await portal.openOperation('Group Management', /^List Agent Groups/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await verifyOp.openConsole();
+      await verifyOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: verifyStatus, body: groupsAfterUpdate } = await sendJson(verifyOp, portal.raw, LIST_BODY_100);
+      expect(verifyStatus).toBe(200);
+      const persisted = (groupsAfterUpdate as Array<{ id: number; isActive: boolean }>).find(g => g.id === groupId);
+      expect(persisted, 'Expected the updated group to still exist').toBeTruthy();
+      expect(persisted!.isActive).toBe(true);
+    } finally {
+      // Cleanup — this test seeds its own data, so it removes it too.
+      if (groupId !== undefined) {
+        const deleteOp = await portal.openOperation('Group Management', /^Delete Agent Group/);
+        await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+        await deleteOp.openConsole();
+        await deleteOp.selectSubscriptionKey(API_KEY_OPTION);
+        await deleteOp.addParameter('agentGroupId', String(groupId));
+        await deleteOp.send().catch(() => { /* best-effort cleanup */ });
+      }
+    }
   });
 
   test('Create Agent Group → Get Agent Group → Delete Agent Group — full lifecycle', async ({ homePage }) => {
@@ -69,49 +118,80 @@ test.describe('Developer Portal (staging) — Group Management API', () => {
     const name = `AQA coverage group ${Date.now()}`;
 
     // Seed a real agent id — an empty agentJson is a silent no-op (KNOWN BUG).
-    const listAgentsOp = await portal.openOperation('Agent Management', /^List Agents/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listAgentsOp.openConsole();
-    await listAgentsOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { body: agents } = await sendJson(listAgentsOp, portal.raw, LIST_BODY_100);
-    const agentId = (agents as Array<{ id: string }>)[0]?.id;
-    expect(agentId, 'Expected at least one agent to seed the group with').toBeTruthy();
+    const seedAgent = await requireAgent(portal);
+    test.skip(!seedAgent, noSeedDataReason('List Agents returned zero agents to seed a group with.'));
+    const agentId = seedAgent!.id;
 
-    const addOp = await portal.openOperation('Group Management', /^Create Agent Group/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await addOp.openConsole();
-    await addOp.selectSubscriptionKey(API_KEY_OPTION);
-    // ADO 37478: { customerId, name, isActive, agentJson } — agentJson is a JSON *string*.
-    const { status: addStatus } = await sendJson(addOp, portal.raw, {
-      customerId: KNOWN.customerId, name, isActive: true, agentJson: JSON.stringify([agentId]),
-    });
-    expect(addStatus).toBe(200);
+    let groupId: number | undefined;
+    let deleteSucceeded = false;
 
-    // The create response's `id` is always 0 (KNOWN BUG) — read the real id back.
-    const listOp = await portal.openOperation('Group Management', /^List Agent Groups/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await listOp.openConsole();
-    await listOp.selectSubscriptionKey(API_KEY_OPTION);
-    const { body: groups } = await sendJson(listOp, portal.raw, LIST_BODY_100);
-    const created = (groups as Array<{ id: number; name: string }>).find(g => g.name === name);
-    expect(created, 'Expected the newly created group to appear in List Agent Groups').toBeTruthy();
-    const groupId = created!.id;
+    try {
+      const addOp = await portal.openOperation('Group Management', /^Create Agent Group/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await addOp.openConsole();
+      await addOp.selectSubscriptionKey(API_KEY_OPTION);
+      // ADO 37478: { customerId, name, isActive, agentJson } — agentJson is a JSON *string*.
+      const { status: addStatus } = await sendJson(addOp, portal.raw, {
+        customerId: TARGET_CUSTOMER_ID, name, isActive: true, agentJson: JSON.stringify([agentId]),
+      });
+      expect(addStatus).toBe(200);
 
-    const getOp = await portal.openOperation('Group Management', /^Get Agent Group \(/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await getOp.openConsole();
-    await getOp.selectSubscriptionKey(API_KEY_OPTION);
-    await getOp.addParameter('groupId', String(groupId));
-    const { status: getStatus, body: fetched } = await getOp.send();
-    expect(getStatus).toBe(200);
-    expect((fetched as { id: number }).id).toBe(groupId);
+      // The create response's `id` is always 0 (KNOWN BUG) — read the real id back.
+      const listOp = await portal.openOperation('Group Management', /^List Agent Groups/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listOp.openConsole();
+      await listOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { body: groups } = await sendJson(listOp, portal.raw, LIST_BODY_100);
+      const created = (groups as Array<{ id: number; name: string }>).find(g => g.name === name);
+      expect(created, 'Expected the newly created group to appear in List Agent Groups').toBeTruthy();
+      groupId = created!.id;
 
-    const deleteOp = await portal.openOperation('Group Management', /^Delete Agent Group/);
-    await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
-    await deleteOp.openConsole();
-    await deleteOp.selectSubscriptionKey(API_KEY_OPTION);
-    await deleteOp.addParameter('agentGroupId', String(groupId));
-    const { status: deleteStatus } = await deleteOp.send();
-    expect(deleteStatus).toBe(200);
+      const getOp = await portal.openOperation('Group Management', /^Preview Agent Group \(/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await getOp.openConsole();
+      await getOp.selectSubscriptionKey(API_KEY_OPTION);
+      await getOp.addParameter('groupId', String(groupId));
+      const { status: getStatus, body: fetched } = await getOp.send();
+      expect(getStatus).toBe(200);
+      expect((fetched as { id: number; name: string }).id).toBe(groupId);
+      expect((fetched as { id: number; name: string }).name).toBe(name);
+
+      const deleteOp = await portal.openOperation('Group Management', /^Delete Agent Group/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await deleteOp.openConsole();
+      await deleteOp.selectSubscriptionKey(API_KEY_OPTION);
+      await deleteOp.addParameter('agentGroupId', String(groupId));
+      const { status: deleteStatus } = await deleteOp.send();
+      expect(deleteStatus).toBe(200);
+      deleteSucceeded = true;
+
+      // Verify by a SEPARATE request that Delete actually removed the record.
+      const listAfterDeleteOp = await portal.openOperation('Group Management', /^List Agent Groups/);
+      await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+      await listAfterDeleteOp.openConsole();
+      await listAfterDeleteOp.selectSubscriptionKey(API_KEY_OPTION);
+      const { status: listAfterDeleteStatus, body: groupsAfterDelete } = await sendJson(listAfterDeleteOp, portal.raw, LIST_BODY_100);
+      expect(listAfterDeleteStatus).toBe(200);
+      expect(
+        (groupsAfterDelete as Array<{ id: number }>).some(g => g.id === groupId),
+        'Expected the deleted group to no longer appear in List Agent Groups',
+      ).toBe(false);
+    } finally {
+      // Cleanup for an assertion failure anywhere ABOVE Delete (Create, the
+      // id-readback List, or Preview) — without this, a failure there
+      // orphans a disposable group permanently. No-op if Delete already
+      // succeeded, or if `groupId` was never captured (Create/List-by-name
+      // itself failed — nothing to delete, and no id to delete it with,
+      // a structural limit of the id:0-response KNOWN BUG this test already
+      // works around).
+      if (groupId !== undefined && !deleteSucceeded) {
+        const cleanupOp = await portal.openOperation('Group Management', /^Delete Agent Group/);
+        await portal.raw.waitForTimeout(SCHEMA_LOAD_PAUSE_MS);
+        await cleanupOp.openConsole();
+        await cleanupOp.selectSubscriptionKey(API_KEY_OPTION);
+        await cleanupOp.addParameter('agentGroupId', String(groupId));
+        await cleanupOp.send().catch(() => { /* best-effort cleanup */ });
+      }
+    }
   });
 });

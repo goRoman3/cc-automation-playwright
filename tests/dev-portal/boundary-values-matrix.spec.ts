@@ -35,7 +35,7 @@ import { EXCLUDED_FROM_NEG_MATRIX } from './negative-fields-catalog';
  * `tests/dev-portal/UNVERIFIED.md` lists which assertions are hypothetical.
  */
 const REPORT_PATH = path.resolve(
-  __dirname, '../../artifacts/dev-portal-evidence-2026-08-29/boundary-values-matrix-latest.md',
+  __dirname, '../../local-only/artifacts/dev-portal-evidence-2026-08-29/boundary-values-matrix-latest.md',
 );
 
 test.describe('Development portal (staging) — boundary-values matrix', () => {
